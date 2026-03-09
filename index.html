@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RuView Observatory — Live Pose</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:ital,wght@0,200;0,400;0,600;1,300&display=swap');
+
+:root {
+  --c: #00f5ff;
+  --g: #00ff88;
+  --a: #ffaa00;
+  --r: #ff3366;
+  --b: #0066ff;
+  --panel: rgba(0,8,18,0.88);
+  --border: rgba(0,245,255,0.18);
+  --glow: 0 0 20px rgba(0,245,255,0.3);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body {
+  background: #000810;
+  color: var(--c);
+  font-family: 'Share Tech Mono', monospace;
+  overflow: hidden;
+  height: 100vh; width: 100vw;
+  cursor: none;
+}
+
+/* custom cursor */
+#cursor {
+  position: fixed;
+  width: 20px; height: 20px;
+  border: 1px solid var(--c);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: width 0.1s, height 0.1s;
+  box-shadow: 0 0 8px var(--c);
+}
+#cursor::after {
+  content:'';
+  position:absolute;
+  top:50%;left:50%;
+  width:3px;height:3px;
+  background:var(--c);
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+}
+
+/* scanlines */
+body::before {
+  content:'';
+  position:fixed;inset:0;
+  background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);
+  pointer-events:none;z-index:1000;
+}
+
+/* ── HEADER ── */
+header {
+  position:fixed;top:0;left:0;right:0;
+  height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+  background:rgba(0,4,12,0.97);
+  border-bottom:1px solid var(--border);
+  z-index:500;
+}
+.logo {
+  font-family:'Orbitron',monospace;
+  font-weight:900;font-size:18px;letter-spacing:5px;
+  color:var(--c);
+  text-shadow:0 0 20px var(--c),0 0 40px rgba(0,245,255,0.3);
+}
+.logo em{color:var(--g);font-style:normal;}
+.hdr-right{display:flex;gap:16px;align-items:center;}
+.pill{
+  font-size:9px;letter-spacing:2px;padding:4px 10px;
+  border:1px solid currentColor;
+  animation:pill-pulse 2s infinite;
+}
+.pill.live{color:var(--g);text-shadow:0 0 8px var(--g);}
+.pill.sim{color:var(--a);text-shadow:0 0 8px var(--a);}
+@keyframes pill-pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+#clockEl{font-size:10px;color:rgba(0,245,255,0.5);letter-spacing:1px;}
+
+/* ── LAYOUT ── */
+.layout {
+  position:fixed;
+  top:52px;left:0;right:0;bottom:28px;
+  display:grid;
+  grid-template-columns: 260px 1fr 260px;
+  grid-template-rows: 1fr 1fr;
+  gap:1px;
+  background:rgba(0,245,255,0.05);
+}
+
+/* ── PANELS ── */
+.panel {
+  background:var(--panel);
+  border:1px solid var(--border);
+  position:relative;
+  overflow:hidden;
+  padding:14px;
+}
+.panel::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--c),transparent);
+  opacity:0.5;
+}
+.ptitle {
+  font-family:'Orbitron',monospace;
+  font-size:8px;letter-spacing:3px;
+  color:rgba(0,245,255,0.45);
+  text-transform:uppercase;
+  margin-bottom:10px;
+  display:flex;align-items:center;gap:8px;
+}
+.ptitle::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent);}
+
+/* corners */
+.panel::after{
+  content:'';
+  position:absolute;
+  bottom:5px;right:5px;
+  width:10px;height:10px;
+  border-bottom:1px solid rgba(0,245,255,0.3);
+  border-right:1px solid rgba(0,245,255,0.3);
+}
+
+/* ── CENTER PANEL ── */
+.p-center {
+  grid-row:1/3;grid-column:2;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;
+  padding:14px;
+  background:radial-gradient(ellipse at 50% 40%,rgba(0,30,50,0.5) 0%,rgba(0,4,12,0.9) 70%);
+}
+
+/* webcam + canvas overlay */
+#camWrap {
+  position:relative;
+  width:100%;
+  max-width:500px;
+  border:1px solid var(--border);
+  background:#000;
+  overflow:hidden;
+}
+#camWrap::before{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,245,255,0.03) 0%,transparent 30%,transparent 70%,rgba(0,245,255,0.05) 100%);
+  pointer-events:none;z-index:10;
+}
+#videoEl {
+  width:100%;
+  display:block;
+  transform:scaleX(-1);
+  opacity:0.7;
+}
+#poseCanvas {
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  z-index:5;
+}
+
+/* center meta row */
+.meta-row {
+  display:flex;gap:0;
+  width:100%;max-width:500px;
+  margin-top:10px;
+  border:1px solid var(--border);
+}
+.meta-cell {
+  flex:1;text-align:center;
+  padding:8px 4px;
+  border-right:1px solid var(--border);
+}
+.meta-cell:last-child{border-right:none;}
+.mv {
+  font-family:'Orbitron',monospace;
+  font-size:16px;font-weight:700;
+}
+.ml{font-size:7px;letter-spacing:2px;color:rgba(0,245,255,0.4);margin-top:2px;}
+
+/* ── VITALS ── */
+.vital-block{
+  border:1px solid rgba(0,245,255,0.1);
+  padding:10px 12px;
+  margin-bottom:8px;
+  background:rgba(0,15,30,0.4);
+  position:relative;
+}
+.vl{font-size:8px;letter-spacing:2px;color:rgba(0,245,255,0.4);text-transform:uppercase;}
+.vv{font-family:'Orbitron',monospace;font-size:26px;font-weight:700;line-height:1.1;margin:3px 0 2px;}
+.vu{font-size:9px;color:rgba(0,245,255,0.4);letter-spacing:1px;}
+.vbar{height:2px;background:rgba(0,245,255,0.08);margin-top:8px;}
+.vbar-fill{height:100%;transition:width 0.8s ease;box-shadow:0 0 6px currentColor;}
+canvas.wave{width:100%;height:44px;display:block;margin-top:6px;}
+
+/* ── HEATMAP ── */
+#heatCanvas{width:100%;height:calc(100% - 28px);display:block;}
+
+/* ── SUBCARRIER ── */
+#subCanvas{width:100%;height:calc(100% - 28px);display:block;}
+
+/* ── CONVERGENCE ── */
+.conv-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;height:calc(50% - 20px);}
+.conv-cell{
+  border:1px solid rgba(0,245,255,0.1);
+  padding:8px 10px;
+  background:rgba(0,12,24,0.5);
+  display:flex;flex-direction:column;gap:4px;
+}
+.cl{font-size:8px;letter-spacing:1px;color:rgba(0,245,255,0.4);text-transform:uppercase;}
+.cv{font-family:'Orbitron',monospace;font-size:15px;font-weight:700;}
+.cbar{height:1px;background:rgba(0,245,255,0.08);}
+.cbar-fill{height:100%;background:var(--c);box-shadow:0 0 4px var(--c);transition:width 1s;}
+
+/* ── NODES ── */
+.nodes-list{display:flex;flex-direction:column;gap:5px;margin-top:8px;}
+.node-row{
+  display:flex;align-items:center;gap:8px;
+  padding:5px 8px;
+  border:1px solid rgba(0,245,255,0.08);
+  background:rgba(0,10,20,0.4);
+}
+.ndot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.ndot.on{background:var(--g);box-shadow:0 0 8px var(--g);animation:ndot 1.5s infinite;}
+.ndot.dim{background:var(--a);box-shadow:0 0 6px var(--a);animation:ndot 2s infinite 0.5s;}
+.ndot.off{background:#222;}
+@keyframes ndot{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.ni{flex:1;}
+.nn{font-size:9px;letter-spacing:0.5px;}
+.ns{font-size:8px;color:rgba(0,245,255,0.35);}
+.nf{font-family:'Orbitron',monospace;font-size:10px;color:var(--g);}
+
+/* ── SPLASH SCREEN ── */
+#splash {
+  position:fixed;inset:0;
+  background:#000810;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  z-index:2000;
+  gap:24px;
+}
+.splash-logo{
+  font-family:'Orbitron',monospace;
+  font-weight:900;font-size:48px;letter-spacing:12px;
+  color:var(--c);
+  text-shadow:0 0 40px var(--c),0 0 80px rgba(0,245,255,0.4);
+  animation:flicker 4s infinite;
+}
+@keyframes flicker{0%,95%,100%{opacity:1;}96%{opacity:0.7;}97%{opacity:1;}98%{opacity:0.8;}}
+.splash-sub{
+  font-family:'Exo 2',sans-serif;
+  font-size:13px;letter-spacing:4px;
+  color:rgba(0,245,255,0.5);
+  font-weight:200;
+}
+#startBtn {
+  font-family:'Orbitron',monospace;
+  font-size:11px;letter-spacing:3px;
+  padding:14px 36px;
+  background:transparent;
+  border:1px solid var(--c);
+  color:var(--c);
+  cursor:pointer;
+  text-transform:uppercase;
+  text-shadow:0 0 10px var(--c);
+  box-shadow:0 0 20px rgba(0,245,255,0.2);
+  transition:all 0.3s;
+  margin-top:10px;
+}
+#startBtn:hover{
+  background:rgba(0,245,255,0.1);
+  box-shadow:0 0 40px rgba(0,245,255,0.4);
+  transform:scale(1.03);
+}
+.splash-note{
+  font-size:10px;color:rgba(0,245,255,0.3);letter-spacing:1px;
+  max-width:360px;text-align:center;line-height:1.8;
+}
+.splash-bar{
+  width:200px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--c),transparent);
+  opacity:0.4;
+}
+
+/* ── KEYPOINT LABELS ── */
+.kp-overlay{
+  position:absolute;
+  top:8px;right:8px;
+  font-size:8px;letter-spacing:1px;
+  color:rgba(0,245,255,0.6);
+  z-index:20;
+  line-height:1.8;
+}
+
+/* ── TICKER ── */
+#ticker {
+  position:fixed;bottom:0;left:0;right:0;
+  height:28px;
+  background:rgba(0,3,10,0.97);
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;
+  overflow:hidden;
+  z-index:500;
+}
+.tlbl{
+  font-size:8px;letter-spacing:2px;color:var(--a);
+  padding:0 14px;white-space:nowrap;
+  border-right:1px solid var(--border);
+  height:100%;display:flex;align-items:center;flex-shrink:0;
+}
+.ttrack{
+  display:flex;gap:60px;
+  animation:ticker-scroll 50s linear infinite;
+  white-space:nowrap;
+  font-size:9px;letter-spacing:1px;
+  color:rgba(0,245,255,0.4);
+  padding-left:30px;
+}
+@keyframes ticker-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* ── FADE IN ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.panel{animation:fadeUp 0.5s ease both;}
+.panel:nth-child(1){animation-delay:0.1s;}
+.panel:nth-child(2){animation-delay:0.25s;}
+.panel:nth-child(3){animation-delay:0.15s;}
+.panel:nth-child(4){animation-delay:0.2s;}
+.panel:nth-child(5){animation-delay:0.3s;}
+
+/* glow helpers */
+.gc{color:var(--c);text-shadow:0 0 10px var(--c);}
+.gg{color:var(--g);text-shadow:0 0 10px var(--g);}
+.ga{color:var(--a);text-shadow:0 0 10px var(--a);}
+.gr{color:var(--r);text-shadow:0 0 10px var(--r);}
+
+/* error box */
+#errBox{
+  display:none;
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:rgba(0,5,15,0.98);
+  border:1px solid var(--r);
+  padding:30px 40px;
+  text-align:center;
+  z-index:3000;
+  max-width:400px;
+}
+#errBox h3{color:var(--r);font-family:'Orbitron',monospace;font-size:12px;letter-spacing:3px;margin-bottom:12px;}
+#errBox p{font-size:11px;color:rgba(0,245,255,0.6);line-height:1.8;}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo">RUVIEW</div>
+  <div class="splash-bar"></div>
+  <div class="splash-sub">HUMAN SENSING OBSERVATORY</div>
+  <div class="splash-note">
+    Real-time pose estimation using your webcam.<br>
+    Powered by MediaPipe + TensorFlow.js — 100% free, runs in browser.<br>
+    No data is sent anywhere. Everything runs locally.
+  </div>
+  <button id="startBtn">⬡ INITIALIZE SENSORS</button>
+  <div class="splash-note" style="font-size:9px;opacity:0.5;">
+    Webcam permission required · Works best in Chrome/Edge
+  </div>
+</div>
+
+<!-- ERROR -->
+<div id="errBox">
+  <h3>⚠ SENSOR ERROR</h3>
+  <p id="errMsg">Webcam access denied. Please allow camera permission and reload.</p>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">RU<em>VIEW</em> <span style="font-size:10px;font-weight:400;color:rgba(0,245,255,0.35);letter-spacing:2px;font-family:'Exo 2',sans-serif;">OBSERVATORY</span></div>
+  <div class="hdr-right">
+    <div class="pill live" id="liveStatus">● INITIALIZING</div>
+    <div id="clockEl">--:--:-- UTC</div>
+    <div class="pill sim">WEBCAM MODE</div>
+  </div>
+</header>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT TOP: Subcarrier sim (signal visualization) -->
+  <div class="panel">
+    <div class="ptitle">Signal Manifold</div>
+    <canvas id="subCanvas"></canvas>
+  </div>
+
+  <!-- CENTER: Webcam + Pose -->
+  <div class="panel p-center">
+    <div class="ptitle" style="width:100%;max-width:500px;">Live Pose Estimation · MediaPipe BlazePose</div>
+    <div id="camWrap">
+      <video id="videoEl" autoplay muted playsinline></video>
+      <canvas id="poseCanvas"></canvas>
+      <div class="kp-overlay" id="kpInfo">KEYPOINTS: --<br>CONFIDENCE: --</div>
+    </div>
+    <div class="meta-row">
+      <div class="meta-cell"><div class="mv gc" id="mPersons">0</div><div class="ml">DETECTED</div></div>
+      <div class="meta-cell"><div class="mv gg" id="mFps">0</div><div class="ml">FPS</div></div>
+      <div class="meta-cell"><div class="mv gc" id="mConf">0%</div><div class="ml">CONFIDENCE</div></div>
+      <div class="meta-cell"><div class="mv ga" id="mMotion">—</div><div class="ml">MOTION</div></div>
+    </div>
+  </div>
+
+  <!-- RIGHT TOP: Vitals (derived from pose) -->
+  <div class="panel">
+    <div class="ptitle">Pose Analytics</div>
+    <div class="vital-block">
+      <div class="vl">Shoulder Width</div>
+      <div class="vv gr" id="vShoulderW">—</div>
+      <div class="vu">PIXELS · BODY SCALE</div>
+      <div class="vbar"><div class="vbar-fill" id="vShoulderBar" style="width:0%;color:var(--r);background:var(--r);"></div></div>
+    </div>
+    <div class="vital-block">
+      <div class="vl">Body Height</div>
+      <div class="vv gc" id="vBodyH">—</div>
+      <div class="vu">PIXELS · NOSE→ANKLE</div>
+      <div class="vbar"><div class="vbar-fill" id="vBodyBar" style="width:0%;color:var(--c);background:var(--c);"></div></div>
+    </div>
+    <div class="vital-block">
+      <div class="vl">Motion Intensity</div>
+      <div class="vv ga" id="vMotion">IDLE</div>
+      <div class="vu">ESTIMATED ACTIVITY</div>
+      <canvas class="wave" id="motionWave"></canvas>
+    </div>
+    <div class="vital-block">
+      <div class="vl">Torso Angle</div>
+      <div class="vv gg" id="vTorso">—</div>
+      <div class="vu">DEGREES · VERTICAL</div>
+      <div class="vbar"><div class="vbar-fill" id="vTorsoBar" style="width:50%;color:var(--g);background:var(--g);"></div></div>
+    </div>
+  </div>
+
+  <!-- LEFT BOTTOM: Presence Heatmap -->
+  <div class="panel">
+    <div class="ptitle">Presence Heatmap</div>
+    <canvas id="heatCanvas"></canvas>
+  </div>
+
+  <!-- RIGHT BOTTOM: Convergence + Nodes -->
+  <div class="panel" style="display:flex;flex-direction:column;gap:8px;">
+    <div class="ptitle">System Status</div>
+    <div class="conv-grid">
+      <div class="conv-cell">
+        <div class="cl">Pose Confidence</div>
+        <div class="cv gg" id="cvConf">0%</div>
+        <div class="cbar"><div class="cbar-fill" id="cbConf" style="width:0%"></div></div>
+        <div style="font-size:7px;color:rgba(0,245,255,0.3);">MEDIAPIPE SCORE</div>
+      </div>
+      <div class="conv-cell">
+        <div class="cl">Keypoints</div>
+        <div class="cv gc" id="cvKP">0 / 33</div>
+        <div class="cbar"><div class="cbar-fill" id="cbKP" style="width:0%"></div></div>
+        <div style="font-size:7px;color:rgba(0,245,255,0.3);">BLAZEPOSE FULL</div>
+      </div>
+      <div class="conv-cell">
+        <div class="cl">Frame Rate</div>
+        <div class="cv ga" id="cvFps">0 fps</div>
+        <div class="cbar"><div class="cbar-fill" id="cbFps" style="width:0%;background:var(--a);box-shadow:0 0 4px var(--a);"></div></div>
+        <div style="font-size:7px;color:rgba(0,245,255,0.3);">TARGET 30fps</div>
+      </div>
+      <div class="conv-cell">
+        <div class="cl">Detection</div>
+        <div class="cv" id="cvDet" style="color:var(--a);">SCANNING</div>
+        <div class="cbar"><div class="cbar-fill" id="cbDet" style="width:30%;background:var(--a);box-shadow:0 0 4px var(--a);animation:pill-pulse 1s infinite;"></div></div>
+        <div style="font-size:7px;color:rgba(0,245,255,0.3);">PERSON STATE</div>
+      </div>
+    </div>
+
+    <div class="ptitle" style="margin-top:4px;">Sensor Array</div>
+    <div class="nodes-list">
+      <div class="node-row">
+        <div class="ndot on"></div>
+        <div class="ni"><div class="nn">WEBCAM · PRIMARY</div><div class="ns">RGB · 30fps · LOCAL</div></div>
+        <div class="nf" id="nf1">LIVE</div>
+      </div>
+      <div class="node-row">
+        <div class="ndot on" style="animation-delay:0.3s"></div>
+        <div class="ni"><div class="nn">MEDIAPIPE · BLAZEPOSE</div><div class="ns">33 KEYPOINTS · WASM</div></div>
+        <div class="nf" id="nf2">ACTIVE</div>
+      </div>
+      <div class="node-row">
+        <div class="ndot on" style="animation-delay:0.6s"></div>
+        <div class="ni"><div class="nn">HEATMAP ENGINE</div><div class="ns">PRESENCE GRID · LOCAL</div></div>
+        <div class="nf">ACTIVE</div>
+      </div>
+      <div class="node-row">
+        <div class="ndot dim"></div>
+        <div class="ni"><div class="nn">WIFI CSI · ESP32</div><div class="ns">NOT CONNECTED</div></div>
+        <div class="nf" style="color:var(--a);">OFFLINE</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TICKER -->
+<div id="ticker">
+  <div class="tlbl">⬡ SYS</div>
+  <div class="ttrack">
+    <span>MEDIAPIPE BLAZEPOSE · 33 KEYPOINTS · WASM INFERENCE · NO SERVER NEEDED</span>
+    <span>ALL PROCESSING LOCAL · ZERO DATA SENT · PRIVACY FIRST</span>
+    <span>RUVIEW OBSERVATORY · WEBCAM MODE · FREE · NO HARDWARE</span>
+    <span>POSE ESTIMATION ACTIVE · HEATMAP TRACKING · SIGNAL MANIFOLD LIVE</span>
+    <span>TIP: STEP BACK 1-2 METERS FROM CAMERA FOR BEST FULL-BODY DETECTION</span>
+    <span>MEDIAPIPE BLAZEPOSE · 33 KEYPOINTS · WASM INFERENCE · NO SERVER NEEDED</span>
+    <span>ALL PROCESSING LOCAL · ZERO DATA SENT · PRIVACY FIRST</span>
+    <span>RUVIEW OBSERVATORY · WEBCAM MODE · FREE · NO HARDWARE</span>
+    <span>POSE ESTIMATION ACTIVE · HEATMAP TRACKING · SIGNAL MANIFOLD LIVE</span>
+    <span>TIP: STEP BACK 1-2 METERS FROM CAMERA FOR BEST FULL-BODY DETECTION</span>
+  </div>
+</div>
+
+<!-- MediaPipe via CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+
+<script>
+// ─── CURSOR ──────────────────────────────────────────────────────────────────
+const cursorEl = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursorEl.style.left = e.clientX + 'px';
+  cursorEl.style.top = e.clientY + 'px';
+});
+
+// ─── CLOCK ───────────────────────────────────────────────────────────────────
+setInterval(() => {
+  document.getElementById('clockEl').textContent =
+    new Date().toISOString().replace('T',' ').slice(0,19) + ' UTC';
+}, 1000);
+
+// ─── UTILITY ─────────────────────────────────────────────────────────────────
+const lerp = (a,b,t) => a+(b-a)*t;
+const clamp = (v,mn,mx) => Math.max(mn,Math.min(mx,v));
+const rand = (a,b) => a+Math.random()*(b-a);
+const PI = Math.PI, sin = Math.sin, cos = Math.cos;
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let poseResults = null;
+let fps = 0, fpsFrames = 0, fpsLast = performance.now();
+let lastKeypoints = null;
+let motionHistory = new Float32Array(80).fill(0);
+let motionPhase = 0;
+let heatGrid = null, HEAT_W = 24, HEAT_H = 18;
+let subPhase = 0;
+
+// ─── HEATMAP INIT ────────────────────────────────────────────────────────────
+heatGrid = Array.from({length: HEAT_H}, () => new Float32Array(HEAT_W));
+
+// ─── SIGNAL MANIFOLD (simulated + pose-driven) ───────────────────────────────
+const subCanvas = document.getElementById('subCanvas');
+const subCtx = subCanvas.getContext('2d');
+const N_SUB = 52, N_HIST = 70;
+const subData = Array.from({length: N_SUB}, () => new Float32Array(N_HIST).fill(0.2));
+
+function resizeSub() {
+  subCanvas.width = subCanvas.clientWidth || 230;
+  subCanvas.height = subCanvas.clientHeight || 200;
+}
+
+function updateSub() {
+  subPhase += 0.035;
+  const motionBoost = motionHistory[79] || 0;
+  for (let i = 0; i < N_SUB; i++) {
+    const base = 0.35 + sin(i * 0.2 + subPhase) * 0.18
+                      + sin(i * 0.06 + subPhase * 0.5) * 0.12
+                      + motionBoost * 0.25 * sin(i * 0.3 + subPhase * 2);
+    const noise = (Math.random() - 0.5) * 0.06;
+    const arr = subData[i];
+    arr.copyWithin(0, 1);
+    arr[N_HIST-1] = clamp(base + noise, 0, 1);
+  }
+}
+
+function drawSub() {
+  const W = subCanvas.width, H = subCanvas.height;
+  subCtx.clearRect(0,0,W,H);
+  const cw = W/N_HIST, ch = H/N_SUB;
+  for (let t = 0; t < N_HIST; t++) {
+    for (let s = 0; s < N_SUB; s++) {
+      const v = subData[s][t];
+      const r = Math.floor(lerp(0, 0, v));
+      const g = Math.floor(lerp(10, 245, v));
+      const b = Math.floor(lerp(30, 255, v));
+      subCtx.fillStyle = `rgba(${r},${g},${b},${0.08 + v*0.92})`;
+      subCtx.fillRect(t*cw, s*ch, cw+0.5, ch+0.5);
+    }
+  }
+  // axis labels
+  subCtx.fillStyle = 'rgba(0,245,255,0.3)';
+  subCtx.font = '7px "Share Tech Mono"';
+  subCtx.textAlign = 'left';
+  subCtx.fillText('SC-0', 2, 10);
+  subCtx.fillText(`SC-${N_SUB}`, 2, H-4);
+  // time arrow
+  subCtx.fillStyle = 'rgba(0,245,255,0.15)';
+  subCtx.fillText('t →', W-28, H-4);
+}
+
+// ─── HEATMAP ─────────────────────────────────────────────────────────────────
+const heatCanvas = document.getElementById('heatCanvas');
+const heatCtx = heatCanvas.getContext('2d');
+
+function resizeHeat() {
+  heatCanvas.width = heatCanvas.clientWidth || 230;
+  heatCanvas.height = heatCanvas.clientHeight || 200;
+}
+
+function updateHeatFromPose(landmarks) {
+  // Decay
+  for (let y = 0; y < HEAT_H; y++)
+    for (let x = 0; x < HEAT_W; x++)
+      heatGrid[y][x] *= 0.93;
+
+  if (!landmarks) return;
+  // Key body points to track
+  const pts = [0, 11, 12, 23, 24, 15, 16, 27, 28];
+  pts.forEach(i => {
+    const lm = landmarks[i];
+    if (!lm || lm.visibility < 0.4) return;
+    const gx = Math.floor((1 - lm.x) * HEAT_W);
+    const gy = Math.floor(lm.y * HEAT_H);
+    for (let dy = -2; dy <= 2; dy++) {
+      for (let dx = -2; dx <= 2; dx++) {
+        const nx = clamp(gx+dx, 0, HEAT_W-1);
+        const ny = clamp(gy+dy, 0, HEAT_H-1);
+        const d = Math.sqrt(dx*dx+dy*dy);
+        heatGrid[ny][nx] = Math.min(1, heatGrid[ny][nx] + Math.exp(-d*0.8) * 0.25);
+      }
+    }
+  });
+}
+
+function drawHeat() {
+  const W = heatCanvas.width, H = heatCanvas.height;
+  heatCtx.clearRect(0,0,W,H);
+  const cw = W/HEAT_W, ch = H/HEAT_H;
+  for (let y = 0; y < HEAT_H; y++) {
+    for (let x = 0; x < HEAT_W; x++) {
+      const v = heatGrid[y][x];
+      if (v < 0.01) continue;
+      const r = Math.floor(lerp(0, 255, v*v));
+      const g = Math.floor(lerp(20, 180, v));
+      const b = Math.floor(lerp(30, 255, v*0.2));
+      heatCtx.fillStyle = `rgba(${r},${g},${b},${v})`;
+      heatCtx.fillRect(x*cw, y*ch, cw, ch);
+    }
+  }
+  // grid
+  heatCtx.strokeStyle = 'rgba(0,245,255,0.04)';
+  heatCtx.lineWidth = 0.5;
+  for (let x=0;x<=HEAT_W;x++){heatCtx.beginPath();heatCtx.moveTo(x*cw,0);heatCtx.lineTo(x*cw,H);heatCtx.stroke();}
+  for (let y=0;y<=HEAT_H;y++){heatCtx.beginPath();heatCtx.moveTo(0,y*ch);heatCtx.lineTo(W,y*ch);heatCtx.stroke();}
+  // border
+  heatCtx.strokeStyle='rgba(0,245,255,0.15)';heatCtx.lineWidth=1;
+  heatCtx.strokeRect(0.5,0.5,W-1,H-1);
+}
+
+// ─── MOTION WAVE ─────────────────────────────────────────────────────────────
+const motionWaveCanvas = document.getElementById('motionWave');
+const motionWaveCtx = motionWaveCanvas.getContext('2d');
+
+function resizeMotionWave() {
+  motionWaveCanvas.width = motionWaveCanvas.clientWidth || 200;
+  motionWaveCanvas.height = 44;
+}
+
+function drawMotionWave() {
+  const W = motionWaveCanvas.width, H = motionWaveCanvas.height;
+  motionWaveCtx.clearRect(0,0,W,H);
+  motionWaveCtx.beginPath();
+  motionWaveCtx.strokeStyle = '#ffaa00';
+  motionWaveCtx.lineWidth = 1.5;
+  motionWaveCtx.shadowColor = '#ffaa00';
+  motionWaveCtx.shadowBlur = 5;
+  motionHistory.forEach((v,i) => {
+    const x = i/motionHistory.length * W;
+    const y = H - v * H * 0.85 - 2;
+    i === 0 ? motionWaveCtx.moveTo(x,y) : motionWaveCtx.lineTo(x,y);
+  });
+  motionWaveCtx.stroke();
+}
+
+// ─── POSE DRAWING ─────────────────────────────────────────────────────────────
+const poseCanvas = document.getElementById('poseCanvas');
+const poseCtx = poseCanvas.getContext('2d');
+
+// MediaPipe POSE_CONNECTIONS uses these indices
+const CONNECTIONS = [
+  [0,1],[1,2],[2,3],[3,7],[0,4],[4,5],[5,6],[6,8],
+  [9,10],[11,12],[11,13],[13,15],[15,17],[15,19],[17,19],
+  [12,14],[14,16],[16,18],[16,20],[18,20],
+  [11,23],[12,24],[23,24],
+  [23,25],[25,27],[27,29],[27,31],[29,31],
+  [24,26],[26,28],[28,30],[28,32],[30,32]
+];
+
+function drawPose(landmarks, W, H) {
+  if (!landmarks) return;
+  poseCtx.clearRect(0,0,W,H);
+
+  // Draw connections
+  CONNECTIONS.forEach(([a,b]) => {
+    const la = landmarks[a], lb = landmarks[b];
+    if (!la || !lb) return;
+    const va = la.visibility || 0;
+    const vb = lb.visibility || 0;
+    if (va < 0.3 || vb < 0.3) return;
+
+    const ax = (1-la.x)*W, ay = la.y*H;
+    const bx = (1-lb.x)*W, by = lb.y*H;
+
+    // Color by body region
+    let color = '#00f5ff';
+    if (a >= 11 && a <= 16 || b >= 11 && b <= 16) color = '#00ff88';
+    if (a >= 23 || b >= 23) color = '#ffaa00';
+    if (a <= 8 || b <= 8) color = '#00f5ff';
+
+    const grad = poseCtx.createLinearGradient(ax,ay,bx,by);
+    grad.addColorStop(0, color + 'cc');
+    grad.addColorStop(1, color + '66');
+
+    poseCtx.beginPath();
+    poseCtx.strokeStyle = grad;
+    poseCtx.lineWidth = 2.5;
+    poseCtx.shadowColor = color;
+    poseCtx.shadowBlur = 8;
+    poseCtx.moveTo(ax,ay);
+    poseCtx.lineTo(bx,by);
+    poseCtx.stroke();
+  });
+
+  // Draw joints
+  landmarks.forEach((lm, i) => {
+    if (!lm || (lm.visibility||0) < 0.4) return;
+    const x = (1-lm.x)*W, y = lm.y*H;
+    let color = '#00f5ff';
+    if (i >= 11 && i <= 16) color = '#00ff88';
+    if (i >= 23) color = '#ffaa00';
+
+    poseCtx.beginPath();
+    poseCtx.arc(x, y, i===0 ? 5 : 3, 0, PI*2);
+    poseCtx.fillStyle = color;
+    poseCtx.shadowColor = color;
+    poseCtx.shadowBlur = 12;
+    poseCtx.fill();
+  });
+
+  poseCtx.shadowBlur = 0;
+}
+
+// ─── POSE ANALYTICS ──────────────────────────────────────────────────────────
+let prevLandmarks = null;
+let motionMagnitude = 0;
+
+function analyzePose(landmarks) {
+  if (!landmarks) {
+    updateUI(null);
+    return;
+  }
+
+  // Visibility count
+  const visible = landmarks.filter(l => l && (l.visibility||0) > 0.5).length;
+  const avgConf = landmarks.reduce((s,l) => s+(l?l.visibility||0:0),0) / landmarks.length;
+
+  // Shoulder width
+  const ls = landmarks[11], rs = landmarks[12];
+  let shoulderW = 0;
+  if (ls && rs && (ls.visibility||0) > 0.5 && (rs.visibility||0) > 0.5) {
+    const dx = (ls.x - rs.x) * poseCanvas.width;
+    const dy = (ls.y - rs.y) * poseCanvas.height;
+    shoulderW = Math.round(Math.sqrt(dx*dx+dy*dy));
+  }
+
+  // Body height: nose to ankle
+  const nose = landmarks[0], la = landmarks[27], ra = landmarks[28];
+  let bodyH = 0;
+  if (nose && (la||ra)) {
+    const ankle = la || ra;
+    bodyH = Math.round(Math.abs(nose.y - ankle.y) * poseCanvas.height);
+  }
+
+  // Torso angle
+  let torsoAngle = 0;
+  const lh = landmarks[23], rh = landmarks[24];
+  if (ls && rs && lh && rh) {
+    const mx = ((ls.x+rs.x)/2 - (lh.x+rh.x)/2);
+    const my = ((ls.y+rs.y)/2 - (lh.y+rh.y)/2);
+    torsoAngle = Math.round(Math.atan2(mx, -my) * 180/PI);
+  }
+
+  // Motion from previous frame
+  let motion = 0;
+  if (prevLandmarks) {
+    let totalDelta = 0, count = 0;
+    [0,11,12,23,24,15,16].forEach(i => {
+      const cur = landmarks[i], prev = prevLandmarks[i];
+      if (cur && prev && (cur.visibility||0) > 0.4) {
+        const dx = cur.x - prev.x;
+        const dy = cur.y - prev.y;
+        totalDelta += Math.sqrt(dx*dx+dy*dy);
+        count++;
+      }
+    });
+    motion = count > 0 ? totalDelta/count : 0;
+  }
+  motionMagnitude = lerp(motionMagnitude, motion * 40, 0.3);
+  motionHistory.copyWithin(0,1);
+  motionHistory[79] = clamp(motionMagnitude, 0, 1);
+  prevLandmarks = landmarks;
+
+  // Motion label
+  const motionLabel = motionMagnitude < 0.05 ? 'IDLE'
+                    : motionMagnitude < 0.15 ? 'LOW'
+                    : motionMagnitude < 0.35 ? 'ACTIVE'
+                    : 'HIGH';
+
+  updateUI({ visible, avgConf, shoulderW, bodyH, torsoAngle, motionLabel, motionMagnitude });
+  updateHeatFromPose(landmarks);
+}
+
+function updateUI(data) {
+  if (!data) {
+    document.getElementById('cvDet').textContent = 'NO PERSON';
+    document.getElementById('cvDet').className = 'cv gr';
+    document.getElementById('cbDet').style.width = '10%';
+    document.getElementById('mPersons').textContent = '0';
+    document.getElementById('mConf').textContent = '0%';
+    document.getElementById('mMotion').textContent = 'NONE';
+    document.getElementById('kpInfo').textContent = 'KEYPOINTS: 0\nCONFIDENCE: 0%';
+    return;
+  }
+
+  const pct = n => Math.round(n*100);
+
+  document.getElementById('cvConf').textContent = pct(data.avgConf) + '%';
+  document.getElementById('cbConf').style.width = pct(data.avgConf) + '%';
+  document.getElementById('cvKP').textContent = data.visible + ' / 33';
+  document.getElementById('cbKP').style.width = (data.visible/33*100) + '%';
+  document.getElementById('cvDet').textContent = 'DETECTED';
+  document.getElementById('cvDet').className = 'cv gg';
+  document.getElementById('cbDet').style.width = '100%';
+  document.getElementById('cbDet').style.background = 'var(--g)';
+  document.getElementById('cbDet').style.boxShadow = '0 0 4px var(--g)';
+
+  document.getElementById('mPersons').textContent = data.visible > 5 ? '1' : '0';
+  document.getElementById('mConf').textContent = pct(data.avgConf) + '%';
+  document.getElementById('mMotion').textContent = data.motionLabel;
+  document.getElementById('kpInfo').textContent = `KEYPOINTS: ${data.visible}/33\nCONFIDENCE: ${pct(data.avgConf)}%`;
+
+  if (data.shoulderW) {
+    document.getElementById('vShoulderW').textContent = data.shoulderW;
+    document.getElementById('vShoulderBar').style.width = clamp(data.shoulderW/300*100,0,100)+'%';
+  }
+  if (data.bodyH) {
+    document.getElementById('vBodyH').textContent = data.bodyH;
+    document.getElementById('vBodyBar').style.width = clamp(data.bodyH/500*100,0,100)+'%';
+  }
+
+  document.getElementById('vMotion').textContent = data.motionLabel;
+  document.getElementById('vTorso').textContent = data.torsoAngle + '°';
+  document.getElementById('vTorsoBar').style.width = clamp((data.torsoAngle+90)/180*100,0,100)+'%';
+  document.getElementById('mFps').textContent = fps;
+}
+
+// ─── FPS COUNTER ─────────────────────────────────────────────────────────────
+function countFps() {
+  fpsFrames++;
+  const now = performance.now();
+  if (now - fpsLast > 1000) {
+    fps = fpsFrames;
+    fpsFrames = 0;
+    fpsLast = now;
+    document.getElementById('cvFps').textContent = fps + ' fps';
+    document.getElementById('cbFps').style.width = clamp(fps/30*100,0,100)+'%';
+    document.getElementById('nf1').textContent = fps + 'fps';
+    document.getElementById('nf2').textContent = fps + 'fps';
+  }
+}
+
+// ─── MAIN RENDER LOOP ────────────────────────────────────────────────────────
+function renderLoop() {
+  updateSub();
+  drawSub();
+  drawHeat();
+  drawMotionWave();
+  countFps();
+  requestAnimationFrame(renderLoop);
+}
+
+// ─── MEDIAPIPE SETUP ─────────────────────────────────────────────────────────
+function startSensing() {
+  const video = document.getElementById('videoEl');
+  const wrap = document.getElementById('camWrap');
+
+  const pose = new Pose({
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+  });
+
+  pose.setOptions({
+    modelComplexity: 1,
+    smoothLandmarks: true,
+    enableSegmentation: false,
+    smoothSegmentation: false,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5,
+  });
+
+  pose.onResults((results) => {
+    poseResults = results;
+
+    // Sync canvas size to video
+    const vw = video.videoWidth || 640;
+    const vh = video.videoHeight || 480;
+    if (poseCanvas.width !== video.clientWidth || poseCanvas.height !== video.clientHeight) {
+      poseCanvas.width = video.clientWidth;
+      poseCanvas.height = video.clientHeight;
+    }
+
+    const W = poseCanvas.width, H = poseCanvas.height;
+    poseCtx.clearRect(0,0,W,H);
+
+    if (results.poseLandmarks && results.poseLandmarks.length > 0) {
+      drawPose(results.poseLandmarks, W, H);
+      analyzePose(results.poseLandmarks);
+    } else {
+      analyzePose(null);
+    }
+  });
+
+  // Camera
+  const camera = new Camera(video, {
+    onFrame: async () => {
+      await pose.send({image: video});
+    },
+    width: 640,
+    height: 480
+  });
+
+  camera.start().then(() => {
+    document.getElementById('liveStatus').textContent = '● LIVE';
+    document.getElementById('liveStatus').style.color = 'var(--g)';
+    document.getElementById('liveStatus').style.borderColor = 'var(--g)';
+    document.getElementById('liveStatus').style.textShadow = '0 0 8px var(--g)';
+    renderLoop();
+  }).catch(err => {
+    showError('Camera error: ' + err.message + '. Please allow webcam access and reload.');
+  });
+}
+
+function showError(msg) {
+  document.getElementById('errMsg').textContent = msg;
+  document.getElementById('errBox').style.display = 'block';
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  resizeSub(); resizeHeat(); resizeMotionWave();
+});
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  // Fade out splash
+  const splash = document.getElementById('splash');
+  splash.style.transition = 'opacity 0.8s ease';
+  splash.style.opacity = '0';
+  setTimeout(() => {
+    splash.style.display = 'none';
+    resizeSub(); resizeHeat(); resizeMotionWave();
+    startSensing();
+  }, 800);
+});
+
+// Size canvases on first load
+setTimeout(() => { resizeSub(); resizeHeat(); resizeMotionWave(); }, 100);
+</script>
+</body>
+</html>
