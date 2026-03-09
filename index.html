@@ -5,169 +5,173 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>RUVIEW · JARVIS SENTINEL</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
 
-:root {
-  --c: #00f5ff;
-  --g: #00ff88;
-  --a: #ffcc00;
-  --r: #ff3355;
-  --p: #cc44ff;
-  --panel: rgba(0,6,16,0.94);
-  --border: rgba(0,245,255,0.13);
-  --P0: #00ff88; --P1: #ff9900; --P2: #ff44aa; --P3: #aa44ff;
+:root{
+  --c:#00f5ff;--g:#00ff88;--a:#ffcc00;--r:#ff3355;--p:#cc44ff;
+  --panel:rgba(0,6,16,0.94);--border:rgba(0,245,255,0.13);
 }
-
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{background:#000508;color:var(--c);font-family:'Share Tech Mono',monospace;height:100%;width:100%;overflow:hidden;-webkit-tap-highlight-color:transparent;}
 
-body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.09) 3px,rgba(0,0,0,0.09) 4px);pointer-events:none;z-index:8000;}
+/* scanlines - CSS only, zero JS cost */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.08) 3px,rgba(0,0,0,0.08) 4px);pointer-events:none;z-index:8000;}
 
 @media(hover:hover){
   body{cursor:none;}
-  #cursor{position:fixed;width:22px;height:22px;border:1.5px solid var(--c);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);box-shadow:0 0 10px var(--c);}
-  #cursor::after{content:'';position:absolute;top:50%;left:50%;width:4px;height:4px;background:var(--c);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 6px var(--c);}
+  #cursor{position:fixed;width:20px;height:20px;border:1.5px solid var(--c);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);box-shadow:0 0 8px var(--c);}
+  #cursor::after{content:'';position:absolute;top:50%;left:50%;width:3px;height:3px;background:var(--c);border-radius:50%;transform:translate(-50%,-50%);}
 }
 
-header{position:fixed;top:0;left:0;right:0;height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:rgba(0,3,10,0.98);border-bottom:1px solid var(--border);z-index:600;}
-.logo{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(13px,3vw,16px);letter-spacing:5px;color:var(--c);text-shadow:0 0 20px var(--c),0 0 40px rgba(0,245,255,0.25);}
+/* ─ HEADER ─ */
+header{position:fixed;top:0;left:0;right:0;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:rgba(0,3,10,0.98);border-bottom:1px solid var(--border);z-index:600;}
+.logo{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(12px,3vw,15px);letter-spacing:5px;color:var(--c);text-shadow:0 0 16px var(--c);}
 .logo em{color:var(--g);font-style:normal;}
-.hdr-center{display:flex;gap:8px;align-items:center;}
-.pill{font-size:8px;letter-spacing:2px;padding:3px 9px;border:1px solid currentColor;animation:blink 2.2s infinite;white-space:nowrap;}
-.pill.live{color:var(--g);text-shadow:0 0 8px var(--g);}
-.pill.mode{color:var(--a);text-shadow:0 0 8px var(--a);}
-.pill.ai{color:var(--p);text-shadow:0 0 8px var(--p);}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.4;}}
-#clockEl{font-size:8px;color:rgba(0,245,255,0.4);letter-spacing:1px;white-space:nowrap;}
+.hdr-mid{display:flex;gap:7px;align-items:center;}
+.pill{font-size:7px;letter-spacing:2px;padding:3px 8px;border:1px solid currentColor;white-space:nowrap;}
+.pill.live{color:var(--g);animation:blink 2s infinite;}
+.pill.mode{color:var(--a);}
+.pill.ai{color:var(--p);}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.35;}}
+#clockEl{font-size:8px;color:rgba(0,245,255,0.38);letter-spacing:1px;white-space:nowrap;}
 
-.layout{position:fixed;top:48px;left:0;right:0;bottom:24px;display:grid;grid-template-columns:220px 1fr 220px;grid-template-rows:1fr 1fr;gap:1px;background:rgba(0,245,255,0.04);}
+/* ─ LAYOUT ─ */
+.layout{position:fixed;top:46px;left:0;right:0;bottom:22px;display:grid;grid-template-columns:210px 1fr 210px;grid-template-rows:1fr 1fr;gap:1px;background:rgba(0,245,255,0.04);}
 
-.panel{background:var(--panel);border:1px solid var(--border);position:relative;overflow:hidden;padding:12px;}
-.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--c),transparent);opacity:0.4;}
-.panel::after{content:'';position:absolute;bottom:4px;right:4px;width:8px;height:8px;border-bottom:1px solid rgba(0,245,255,0.2);border-right:1px solid rgba(0,245,255,0.2);}
-.ptitle{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:3px;color:rgba(0,245,255,0.38);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+/* ─ PANELS ─ */
+.panel{background:var(--panel);border:1px solid var(--border);position:relative;overflow:hidden;padding:11px;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--c),transparent);opacity:0.35;}
+.ptitle{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:3px;color:rgba(0,245,255,0.36);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
 .ptitle::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent);}
 
-.p-center{grid-row:1/3;grid-column:2;display:flex;flex-direction:column;align-items:center;padding:10px;background:radial-gradient(ellipse at 50% 38%,rgba(0,22,42,0.5) 0%,rgba(0,4,12,0.92) 70%);}
-#camWrap{position:relative;width:100%;max-width:540px;background:#000208;border:1px solid var(--border);overflow:hidden;flex-shrink:0;}
-#camWrap::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,245,255,0.04) 0%,transparent 25%,transparent 75%,rgba(0,245,255,0.06) 100%);pointer-events:none;z-index:10;}
-#camWrap::before{content:'';position:absolute;top:0;left:0;width:22px;height:22px;border-top:2px solid var(--c);border-left:2px solid var(--c);z-index:15;box-shadow:0 0 8px var(--c);}
-.corner-tr,.corner-bl,.corner-br{position:absolute;width:22px;height:22px;z-index:15;}
-.corner-tr{top:0;right:0;border-top:2px solid var(--c);border-right:2px solid var(--c);box-shadow:0 0 8px var(--c);}
-.corner-bl{bottom:0;left:0;border-bottom:2px solid var(--c);border-left:2px solid var(--c);box-shadow:0 0 8px var(--c);}
-.corner-br{bottom:0;right:0;border-bottom:2px solid var(--c);border-right:2px solid var(--c);box-shadow:0 0 8px var(--c);}
-#videoEl{width:100%;display:block;transform:scaleX(-1);opacity:0.76;min-height:200px;}
+/* ─ CENTER ─ */
+.p-center{grid-row:1/3;grid-column:2;display:flex;flex-direction:column;align-items:center;padding:9px;background:radial-gradient(ellipse at 50% 36%,rgba(0,20,38,0.5) 0%,rgba(0,4,12,0.93) 70%);}
+#camWrap{position:relative;width:100%;max-width:540px;background:#000;overflow:hidden;flex-shrink:0;}
+/* corner brackets via CSS only — no JS */
+#camWrap::before{content:'';position:absolute;top:0;left:0;width:20px;height:20px;border-top:2px solid var(--c);border-left:2px solid var(--c);z-index:15;box-shadow:0 0 6px var(--c);}
+.c-tr,.c-bl,.c-br{position:absolute;width:20px;height:20px;z-index:15;pointer-events:none;}
+.c-tr{top:0;right:0;border-top:2px solid var(--c);border-right:2px solid var(--c);box-shadow:0 0 6px var(--c);}
+.c-bl{bottom:0;left:0;border-bottom:2px solid var(--c);border-left:2px solid var(--c);box-shadow:0 0 6px var(--c);}
+.c-br{bottom:0;right:0;border-bottom:2px solid var(--c);border-right:2px solid var(--c);box-shadow:0 0 6px var(--c);}
+#videoEl{width:100%;display:block;transform:scaleX(-1);opacity:0.78;min-height:180px;}
 #poseCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;}
-.scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(0,245,255,0.55),transparent);z-index:12;animation:scan 4s linear infinite;pointer-events:none;}
-@keyframes scan{from{top:-2px;}to{top:100%;}}
-.kp-badge{position:absolute;top:8px;right:8px;background:rgba(0,5,15,0.88);border:1px solid rgba(0,245,255,0.18);padding:5px 8px;z-index:20;font-size:7px;letter-spacing:1px;line-height:2;text-align:right;}
+/* scan line — pure CSS animation, zero JS */
+.scanline{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(0,245,255,0.5),transparent);z-index:12;animation:scanmove 4s linear infinite;pointer-events:none;}
+@keyframes scanmove{from{top:-2px;}to{top:100%;}}
+.kpbadge{position:absolute;top:7px;right:7px;background:rgba(0,4,14,0.86);border:1px solid rgba(0,245,255,0.16);padding:4px 8px;z-index:20;font-size:7px;letter-spacing:1px;line-height:2;text-align:right;}
 
-.meta-row{display:flex;width:100%;max-width:540px;margin-top:8px;border:1px solid var(--border);}
-.meta-cell{flex:1;text-align:center;padding:6px 3px;border-right:1px solid var(--border);}
+.meta-row{display:flex;width:100%;max-width:540px;margin-top:7px;border:1px solid var(--border);}
+.meta-cell{flex:1;text-align:center;padding:6px 2px;border-right:1px solid var(--border);}
 .meta-cell:last-child{border-right:none;}
-.mv{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;}
-.ml{font-size:6px;letter-spacing:2px;color:rgba(0,245,255,0.32);margin-top:2px;}
+.mv{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;}
+.ml{font-size:6px;letter-spacing:1.5px;color:rgba(0,245,255,0.3);margin-top:2px;}
 
-#aiLog{width:100%;max-width:540px;margin-top:8px;border:1px solid var(--border);background:rgba(0,10,20,0.7);padding:7px 10px;height:62px;overflow:hidden;}
-#aiLog::before{content:'J.A.R.V.I.S ▸';font-family:'Orbitron',monospace;font-size:6px;letter-spacing:3px;color:rgba(0,245,255,0.28);display:block;margin-bottom:4px;}
-.ai-line{font-size:8px;letter-spacing:0.5px;color:rgba(0,245,255,0.65);line-height:1.85;animation:fadeIn 0.35s ease;}
-@keyframes fadeIn{from{opacity:0;transform:translateX(-5px);}to{opacity:1;transform:translateX(0);}}
+#aiLog{width:100%;max-width:540px;margin-top:7px;border:1px solid var(--border);background:rgba(0,10,20,0.7);padding:6px 9px;height:58px;overflow:hidden;}
+#aiLog::before{content:'J.A.R.V.I.S ▸';font-family:'Orbitron',monospace;font-size:6px;letter-spacing:3px;color:rgba(0,245,255,0.25);display:block;margin-bottom:3px;}
+.ai-line{font-size:7px;letter-spacing:0.5px;color:rgba(0,245,255,0.62);line-height:1.9;}
 
-.vital-block{border:1px solid rgba(0,245,255,0.08);padding:8px 10px;margin-bottom:6px;background:rgba(0,12,24,0.5);}
-.vl{font-size:7px;letter-spacing:2px;color:rgba(0,245,255,0.36);text-transform:uppercase;}
-.vv{font-family:'Orbitron',monospace;font-size:21px;font-weight:700;line-height:1.1;margin:2px 0;}
-.vu{font-size:7px;color:rgba(0,245,255,0.32);letter-spacing:1px;}
-.vbar{height:2px;background:rgba(0,245,255,0.07);margin-top:6px;}
-.vbar-fill{height:100%;transition:width 0.55s ease;box-shadow:0 0 6px currentColor;}
-canvas.wave{width:100%;height:36px;display:block;margin-top:5px;}
+/* ─ VITALS ─ */
+.vb{border:1px solid rgba(0,245,255,0.08);padding:7px 9px;margin-bottom:5px;background:rgba(0,11,22,0.5);}
+.vl{font-size:7px;letter-spacing:1.5px;color:rgba(0,245,255,0.34);text-transform:uppercase;}
+.vv{font-family:'Orbitron',monospace;font-size:20px;font-weight:700;line-height:1.1;margin:2px 0;}
+.vu{font-size:6px;color:rgba(0,245,255,0.3);letter-spacing:1px;}
+.vbar{height:2px;background:rgba(0,245,255,0.07);margin-top:5px;}
+.vbar-fill{height:100%;transition:width 0.5s ease;box-shadow:0 0 5px currentColor;}
+canvas.wave{width:100%;height:34px;display:block;margin-top:5px;}
 
-.gesture-display{border:1px solid rgba(0,245,255,0.08);padding:8px 10px;background:rgba(0,12,24,0.5);margin-bottom:6px;}
-.gesture-name{font-family:'Orbitron',monospace;font-size:13px;color:var(--g);text-shadow:0 0 12px var(--g);letter-spacing:2px;min-height:18px;}
-.gesture-conf{font-size:7px;color:rgba(0,245,255,0.38);letter-spacing:1px;margin-top:3px;}
-.finger-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-top:7px;}
-.finger-cell{border:1px solid rgba(0,245,255,0.09);padding:5px 2px;text-align:center;font-size:6px;letter-spacing:1px;color:rgba(0,245,255,0.35);transition:all 0.25s;}
-.finger-cell.up{border-color:var(--g);color:var(--g);background:rgba(0,255,136,0.07);box-shadow:0 0 6px rgba(0,255,136,0.2);}
+/* ─ HAND PANEL ─ */
+.gesture-box{border:1px solid rgba(0,245,255,0.08);padding:7px 9px;background:rgba(0,11,22,0.5);margin-bottom:5px;}
+.gname{font-family:'Orbitron',monospace;font-size:12px;color:var(--g);text-shadow:0 0 10px var(--g);letter-spacing:1.5px;min-height:16px;}
+.gconf{font-size:7px;color:rgba(0,245,255,0.35);margin-top:2px;}
+.fgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-top:6px;}
+.fc{border:1px solid rgba(0,245,255,0.08);padding:4px 2px;text-align:center;font-size:6px;letter-spacing:0.5px;color:rgba(0,245,255,0.3);transition:all 0.2s;}
+.fc.up{border-color:var(--g);color:var(--g);background:rgba(0,255,136,0.07);}
 
-#heatCanvas{width:100%;height:calc(100% - 28px);display:block;}
+/* ─ HEATMAP ─ */
+#heatCanvas{width:100%;height:calc(100% - 26px);display:block;}
 
-.conv-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:7px;}
-.conv-cell{border:1px solid rgba(0,245,255,0.08);padding:7px 8px;background:rgba(0,10,20,0.5);}
-.cl{font-size:7px;letter-spacing:1px;color:rgba(0,245,255,0.33);text-transform:uppercase;}
+/* ─ STATUS ─ */
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px;}
+.cc{border:1px solid rgba(0,245,255,0.08);padding:6px 7px;background:rgba(0,9,19,0.5);}
+.cl{font-size:6px;letter-spacing:1px;color:rgba(0,245,255,0.3);text-transform:uppercase;}
 .cv{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;margin:2px 0;}
 .cbar{height:1px;background:rgba(0,245,255,0.06);}
 .cbar-fill{height:100%;background:var(--c);box-shadow:0 0 4px var(--c);transition:width 0.6s;}
 
-.nodes-list{display:flex;flex-direction:column;gap:4px;}
-.node-row{display:flex;align-items:center;gap:7px;padding:4px 7px;border:1px solid rgba(0,245,255,0.07);background:rgba(0,8,18,0.4);}
-.ndot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.ndot.on{background:var(--g);box-shadow:0 0 8px var(--g);animation:nd 1.8s infinite;}
-.ndot.dim{background:var(--a);box-shadow:0 0 6px var(--a);animation:nd 2.5s infinite;}
-.ndot.off{background:#1a1a2a;}
+.nodes{display:flex;flex-direction:column;gap:3px;}
+.nr{display:flex;align-items:center;gap:6px;padding:4px 7px;border:1px solid rgba(0,245,255,0.06);background:rgba(0,7,16,0.4);}
+.nd{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.nd.on{background:var(--g);box-shadow:0 0 7px var(--g);animation:nd 1.8s infinite;}
+.nd.dim{background:var(--a);box-shadow:0 0 5px var(--a);animation:nd 2.5s infinite;}
+.nd.off{background:#18182a;}
 @keyframes nd{0%,100%{opacity:1;}50%{opacity:0.2;}}
-.ni{flex:1;}.nn{font-size:8px;letter-spacing:0.5px;}.ns{font-size:7px;color:rgba(0,245,255,0.28);}
-.nf{font-family:'Orbitron',monospace;font-size:9px;color:var(--g);}
+.ni{flex:1;}.nn{font-size:7px;letter-spacing:0.5px;}.ns{font-size:6px;color:rgba(0,245,255,0.25);}
+.nf{font-family:'Orbitron',monospace;font-size:8px;color:var(--g);}
 
-.person-list{display:flex;flex-direction:column;gap:4px;}
-.person-card{border:1px solid;padding:6px 8px;display:flex;align-items:center;gap:8px;background:rgba(0,10,22,0.6);transition:all 0.3s;}
-.person-avatar{width:26px;height:26px;border-radius:50%;border:1.5px solid;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:9px;font-weight:700;flex-shrink:0;}
-.person-id{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:2px;}
-.person-stats{font-size:7px;letter-spacing:1px;color:rgba(0,245,255,0.36);margin-top:2px;}
-.person-conf{font-family:'Orbitron',monospace;font-size:11px;}
+/* person card */
+.pcard{border:1px solid var(--g);padding:6px 8px;display:flex;align-items:center;gap:7px;background:rgba(0,10,22,0.6);box-shadow:0 0 8px rgba(0,255,136,0.07);}
+.pavatar{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--g);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:8px;font-weight:700;color:var(--g);flex-shrink:0;}
+.pid{font-family:'Orbitron',monospace;font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--g);}
+.pstats{font-size:6px;letter-spacing:1px;color:rgba(0,245,255,0.35);margin-top:2px;}
+.pconf{font-family:'Orbitron',monospace;font-size:10px;color:var(--g);}
 
-/* SPLASH */
-#splash{position:fixed;inset:0;background:#000508;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:7000;gap:18px;padding:20px;}
-.splash-logo{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(28px,8vw,54px);letter-spacing:10px;color:var(--c);text-shadow:0 0 40px var(--c),0 0 80px rgba(0,245,255,0.3);animation:flicker 5s infinite;}
-@keyframes flicker{0%,94%,100%{opacity:1;}95%{opacity:0.55;}96%{opacity:1;}97.5%{opacity:0.7;}}
-.splash-ring{position:relative;width:clamp(90px,22vw,150px);height:clamp(90px,22vw,150px);}
-.splash-ring svg{animation:rot 8s linear infinite;}
-@keyframes rot{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
-.splash-sub{font-family:'Rajdhani',sans-serif;font-size:clamp(10px,2.5vw,13px);letter-spacing:4px;color:rgba(0,245,255,0.42);font-weight:300;text-align:center;}
-.splash-note{font-size:clamp(9px,2vw,11px);color:rgba(0,245,255,0.26);letter-spacing:1px;max-width:320px;text-align:center;line-height:2;}
-#startBtn{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;padding:13px 30px;background:transparent;border:1px solid var(--c);color:var(--c);cursor:pointer;text-transform:uppercase;text-shadow:0 0 10px var(--c);box-shadow:0 0 20px rgba(0,245,255,0.12),inset 0 0 20px rgba(0,245,255,0.02);transition:all 0.3s;position:relative;overflow:hidden;}
-#startBtn::before{content:'';position:absolute;top:50%;left:-100%;width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--c),transparent);transform:translateY(-50%);animation:sweep 3s linear infinite;}
+/* wrist coords */
+.wbox{border:1px solid rgba(0,245,255,0.08);padding:7px 9px;background:rgba(0,11,22,0.5);}
+.wgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px;}
+.wval{font-family:'Orbitron',monospace;font-size:10px;}
+
+/* ─ SPLASH ─ */
+#splash{position:fixed;inset:0;background:#000508;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:7000;gap:16px;padding:20px;}
+.slogo{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(26px,8vw,52px);letter-spacing:10px;color:var(--c);text-shadow:0 0 36px var(--c);animation:flicker 5s infinite;}
+@keyframes flicker{0%,93%,100%{opacity:1;}94%{opacity:0.5;}95%{opacity:1;}97%{opacity:0.65;}}
+.sring{width:clamp(90px,20vw,140px);height:clamp(90px,20vw,140px);}
+.sring svg{animation:rot 8s linear infinite;}
+@keyframes rot{to{transform:rotate(360deg);}}
+.ssub{font-family:'Rajdhani',sans-serif;font-size:clamp(10px,2.5vw,13px);letter-spacing:4px;color:rgba(0,245,255,0.4);font-weight:300;text-align:center;}
+.snote{font-size:clamp(8px,2vw,10px);color:rgba(0,245,255,0.25);letter-spacing:1px;max-width:320px;text-align:center;line-height:2;}
+#startBtn{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;padding:12px 28px;background:transparent;border:1px solid var(--c);color:var(--c);cursor:pointer;text-transform:uppercase;text-shadow:0 0 8px var(--c);transition:all 0.25s;position:relative;overflow:hidden;}
+#startBtn::before{content:'';position:absolute;top:50%;left:-100%;width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--c),transparent);transform:translateY(-50%);animation:sweep 2.5s linear infinite;}
 @keyframes sweep{to{left:200%;}}
-#startBtn:hover{background:rgba(0,245,255,0.07);box-shadow:0 0 40px rgba(0,245,255,0.3);transform:scale(1.04);}
-.loading-bar-wrap{width:200px;height:1px;background:rgba(0,245,255,0.09);}
-.loading-bar{height:100%;width:0%;background:var(--c);box-shadow:0 0 8px var(--c);transition:width 0.1s;}
+#startBtn:hover{background:rgba(0,245,255,0.07);box-shadow:0 0 30px rgba(0,245,255,0.25);}
+.lbwrap{width:190px;height:1px;background:rgba(0,245,255,0.09);}
+.lb{height:100%;width:0%;background:var(--c);box-shadow:0 0 8px var(--c);transition:width 0.1s;}
 
-#ticker{position:fixed;bottom:0;left:0;right:0;height:24px;background:rgba(0,2,8,0.98);border-top:1px solid var(--border);display:flex;align-items:center;overflow:hidden;z-index:600;}
-.tlbl{font-size:7px;letter-spacing:2px;color:var(--a);padding:0 12px;white-space:nowrap;border-right:1px solid var(--border);height:100%;display:flex;align-items:center;flex-shrink:0;}
-.ttrack{display:flex;gap:50px;animation:ticker-scroll 60s linear infinite;white-space:nowrap;font-size:8px;letter-spacing:1px;color:rgba(0,245,255,0.32);padding-left:20px;}
-@keyframes ticker-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+/* ─ TICKER ─ */
+#ticker{position:fixed;bottom:0;left:0;right:0;height:22px;background:rgba(0,2,8,0.98);border-top:1px solid var(--border);display:flex;align-items:center;overflow:hidden;z-index:600;}
+.tlbl{font-size:7px;letter-spacing:2px;color:var(--a);padding:0 11px;white-space:nowrap;border-right:1px solid var(--border);height:100%;display:flex;align-items:center;flex-shrink:0;}
+.tscroll{display:flex;gap:50px;animation:tscroll 55s linear infinite;white-space:nowrap;font-size:7px;letter-spacing:1px;color:rgba(0,245,255,0.3);padding-left:18px;}
+@keyframes tscroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 
-#errBox{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,4,12,0.98);border:1px solid var(--r);padding:26px 34px;text-align:center;z-index:9000;max-width:350px;width:90%;}
-#errBox h3{color:var(--r);font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;margin-bottom:10px;}
+/* error */
+#errBox{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,4,12,0.98);border:1px solid var(--r);padding:24px 32px;text-align:center;z-index:9000;max-width:340px;width:90%;}
+#errBox h3{color:var(--r);font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;margin-bottom:8px;}
 #errBox p{font-size:10px;color:rgba(0,245,255,0.5);line-height:1.9;}
 
-/* Mobile */
+/* mobile */
 @media(max-width:700px){
   header{padding:0 10px;}
   .logo{font-size:12px;letter-spacing:3px;}
-  #clockEl,.hdr-center .pill.mode{display:none;}
-  .layout{grid-template-columns:1fr;display:block;position:fixed;top:48px;left:0;right:0;bottom:24px;}
+  #clockEl,.hdr-mid .pill.mode{display:none;}
+  .layout{grid-template-columns:1fr;display:block;position:fixed;top:46px;left:0;right:0;bottom:22px;}
   .p-center{position:absolute;inset:0;padding:6px;display:flex;flex-direction:column;}
   .layout>.panel:not(.p-center){display:none;}
   #camWrap{flex:1;min-height:0;}
   #videoEl{height:100%;object-fit:cover;min-height:0;}
-  .meta-row .mv{font-size:12px;}
-  #aiLog{height:50px;}
-}
-@media(max-width:700px) and (orientation:landscape){
-  #aiLog{display:none;}
-  .meta-row{display:none;}
+  #aiLog{height:46px;}
 }
 
-.gc{color:var(--c);text-shadow:0 0 8px var(--c);}
-.gg{color:var(--g);text-shadow:0 0 8px var(--g);}
-.ga{color:var(--a);text-shadow:0 0 8px var(--a);}
-.gr{color:var(--r);text-shadow:0 0 8px var(--r);}
-.gp{color:var(--p);text-shadow:0 0 8px var(--p);}
+/* color helpers */
+.gc{color:var(--c);text-shadow:0 0 7px var(--c);}
+.gg{color:var(--g);text-shadow:0 0 7px var(--g);}
+.ga{color:var(--a);text-shadow:0 0 7px var(--a);}
+.gr{color:var(--r);text-shadow:0 0 7px var(--r);}
+.gp{color:var(--p);text-shadow:0 0 7px var(--p);}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 .panel{animation:fadeUp 0.5s ease both;}
-.panel:nth-child(1){animation-delay:0.05s;}.panel:nth-child(2){animation-delay:0.15s;}
-.panel:nth-child(3){animation-delay:0.1s;}.panel:nth-child(4){animation-delay:0.2s;}
-.panel:nth-child(5){animation-delay:0.25s;}
+.panel:nth-child(1){animation-delay:.05s}.panel:nth-child(2){animation-delay:.15s}
+.panel:nth-child(3){animation-delay:.1s}.panel:nth-child(4){animation-delay:.2s}
+.panel:nth-child(5){animation-delay:.25s}
 </style>
 </head>
 <body>
@@ -175,39 +179,32 @@ canvas.wave{width:100%;height:36px;display:block;margin-top:5px;}
 
 <!-- SPLASH -->
 <div id="splash">
-  <div class="splash-logo">RUVIEW</div>
-  <div class="splash-ring">
-    <svg viewBox="0 0 160 160" width="100%" height="100%">
-      <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(0,245,255,0.07)" stroke-width="1"/>
-      <circle cx="80" cy="80" r="70" fill="none" stroke="url(#rg)" stroke-width="1.5" stroke-dasharray="110 330"/>
-      <circle cx="80" cy="80" r="56" fill="none" stroke="rgba(0,255,136,0.35)" stroke-width="1" stroke-dasharray="38 314" stroke-dashoffset="180"/>
-      <circle cx="80" cy="80" r="42" fill="none" stroke="rgba(255,204,0,0.2)" stroke-width="0.5" stroke-dasharray="20 244"/>
-      <circle cx="80" cy="80" r="4" fill="#00f5ff" opacity="0.9"/>
-      <circle cx="80" cy="80" r="10" fill="none" stroke="#00f5ff" stroke-width="0.5" opacity="0.4"/>
-      <text x="80" y="84" text-anchor="middle" font-family="Orbitron,monospace" font-size="7" fill="rgba(0,245,255,0.55)" letter-spacing="2">INIT</text>
-      <defs>
-        <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#00f5ff" stop-opacity="0"/>
-          <stop offset="50%" stop-color="#00f5ff" stop-opacity="1"/>
-          <stop offset="100%" stop-color="#00f5ff" stop-opacity="0"/>
-        </linearGradient>
-      </defs>
+  <div class="slogo">RUVIEW</div>
+  <div class="sring">
+    <svg viewBox="0 0 140 140" width="100%" height="100%">
+      <circle cx="70" cy="70" r="62" fill="none" stroke="rgba(0,245,255,0.07)" stroke-width="1"/>
+      <circle cx="70" cy="70" r="62" fill="none" stroke="url(#rg)" stroke-width="1.5" stroke-dasharray="100 290"/>
+      <circle cx="70" cy="70" r="50" fill="none" stroke="rgba(0,255,136,0.3)" stroke-width="1" stroke-dasharray="34 280" stroke-dashoffset="160"/>
+      <circle cx="70" cy="70" r="38" fill="none" stroke="rgba(255,204,0,0.15)" stroke-width="0.5" stroke-dasharray="18 220"/>
+      <circle cx="70" cy="70" r="3.5" fill="#00f5ff"/>
+      <circle cx="70" cy="70" r="9" fill="none" stroke="#00f5ff" stroke-width="0.5" opacity="0.4"/>
+      <text x="70" y="74" text-anchor="middle" font-family="Orbitron,monospace" font-size="6" fill="rgba(0,245,255,0.5)" letter-spacing="2">INIT</text>
+      <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00f5ff" stop-opacity="0"/><stop offset="50%" stop-color="#00f5ff" stop-opacity="1"/><stop offset="100%" stop-color="#00f5ff" stop-opacity="0"/></linearGradient></defs>
     </svg>
   </div>
-  <div class="splash-sub">JARVIS SENTINEL · HUMAN SENSING OBSERVATORY</div>
-  <div class="splash-note">Full-body pose · Hand tracking · Finger detection · Gesture recognition<br>Multi-person · Smooth interpolation · 100% local · Zero data sent</div>
-  <div class="loading-bar-wrap"><div class="loading-bar" id="loadBar"></div></div>
+  <div class="ssub">JARVIS SENTINEL · HUMAN SENSING OBSERVATORY</div>
+  <div class="snote">Full-body pose · Hand + finger tracking · Gesture recognition<br>Optimized pipeline · Interleaved models · Low latency</div>
+  <div class="lbwrap"><div class="lb" id="loadBar"></div></div>
   <button id="startBtn">⬡ INITIALIZE JARVIS</button>
-  <div class="splash-note" style="font-size:8px;opacity:0.35;">Webcam required · Chrome/Edge recommended</div>
+  <div class="snote" style="font-size:7px;opacity:0.3;">Chrome/Edge recommended · Allow camera access</div>
 </div>
 
-<!-- ERROR -->
-<div id="errBox"><h3>⚠ SENSOR FAULT</h3><p id="errMsg">Webcam access denied.</p></div>
+<div id="errBox"><h3>⚠ SENSOR FAULT</h3><p id="errMsg">Camera error.</p></div>
 
 <!-- HEADER -->
 <header>
   <div class="logo">RU<em>VIEW</em></div>
-  <div class="hdr-center">
+  <div class="hdr-mid">
     <div class="pill live" id="liveStatus">● INIT</div>
     <div class="pill mode">POSE+HANDS</div>
     <div class="pill ai">J.A.R.V.I.S</div>
@@ -215,87 +212,67 @@ canvas.wave{width:100%;height:36px;display:block;margin-top:5px;}
   <div id="clockEl">--:--:-- UTC</div>
 </header>
 
-<!-- LAYOUT -->
+<!-- MAIN -->
 <div class="layout">
 
   <!-- LEFT TOP: Pose Analytics -->
   <div class="panel">
     <div class="ptitle">Pose Analytics</div>
-    <div class="vital-block">
-      <div class="vl">Shoulder Width</div>
-      <div class="vv gr" id="vShoulderW">—</div>
-      <div class="vu">PIXELS · BODY SCALE</div>
-      <div class="vbar"><div class="vbar-fill" id="vShoulderBar" style="width:0%;color:var(--r);background:var(--r);"></div></div>
-    </div>
-    <div class="vital-block">
-      <div class="vl">Body Height</div>
-      <div class="vv gc" id="vBodyH">—</div>
-      <div class="vu">NOSE → ANKLE</div>
-      <div class="vbar"><div class="vbar-fill" id="vBodyBar" style="width:0%;color:var(--c);background:var(--c);"></div></div>
-    </div>
-    <div class="vital-block">
-      <div class="vl">Torso Lean</div>
-      <div class="vv gg" id="vTorso">—</div>
-      <div class="vu">DEGREES · VERTICAL AXIS</div>
-      <div class="vbar"><div class="vbar-fill" id="vTorsoBar" style="width:50%;color:var(--g);background:var(--g);"></div></div>
-    </div>
-    <div class="vital-block">
-      <div class="vl">Motion Intensity</div>
-      <div class="vv ga" id="vMotion">IDLE</div>
-      <div class="vu">KINEMATIC ACTIVITY</div>
-      <canvas class="wave" id="motionWave"></canvas>
-    </div>
+    <div class="vb"><div class="vl">Shoulder Width</div><div class="vv gr" id="vShW">—</div><div class="vu">PIXELS · BODY SCALE</div><div class="vbar"><div class="vbar-fill" id="vShBar" style="width:0%;color:var(--r);background:var(--r);"></div></div></div>
+    <div class="vb"><div class="vl">Body Height</div><div class="vv gc" id="vBH">—</div><div class="vu">NOSE → ANKLE</div><div class="vbar"><div class="vbar-fill" id="vBHBar" style="width:0%;color:var(--c);background:var(--c);"></div></div></div>
+    <div class="vb"><div class="vl">Torso Lean</div><div class="vv gg" id="vTorso">—</div><div class="vu">DEGREES · VERTICAL</div><div class="vbar"><div class="vbar-fill" id="vTBar" style="width:50%;color:var(--g);background:var(--g);"></div></div></div>
+    <div class="vb"><div class="vl">Motion Level</div><div class="vv ga" id="vMot">IDLE</div><div class="vu">KINEMATIC ACTIVITY</div><canvas class="wave" id="motionWave"></canvas></div>
   </div>
 
-  <!-- CENTER: Camera + Pose -->
+  <!-- CENTER -->
   <div class="panel p-center">
-    <div class="ptitle" style="width:100%;max-width:540px;">Live Sensor Feed · BlazePose + Hands</div>
+    <div class="ptitle" style="width:100%;max-width:540px;">Live Feed · BlazePose + HandPose</div>
     <div id="camWrap">
       <video id="videoEl" autoplay muted playsinline></video>
       <canvas id="poseCanvas"></canvas>
-      <div class="scan-line"></div>
-      <div class="corner-tr"></div><div class="corner-bl"></div><div class="corner-br"></div>
-      <div class="kp-badge" id="kpInfo">TARGETS: 0<br>POSE KP: --<br>HANDS: --<br>CONF: --%</div>
+      <div class="scanline"></div>
+      <div class="c-tr"></div><div class="c-bl"></div><div class="c-br"></div>
+      <div class="kpbadge" id="kpInfo">TARGETS: 0<br>POSE KP: --<br>HANDS: --<br>CONF: --%</div>
     </div>
     <div class="meta-row">
       <div class="meta-cell"><div class="mv gc" id="mPersons">0</div><div class="ml">TARGETS</div></div>
       <div class="meta-cell"><div class="mv gg" id="mFps">0</div><div class="ml">FPS</div></div>
-      <div class="meta-cell"><div class="mv gc" id="mConf">0%</div><div class="ml">POSE CONF</div></div>
+      <div class="meta-cell"><div class="mv gc" id="mConf">0%</div><div class="ml">CONF</div></div>
       <div class="meta-cell"><div class="mv ga" id="mHands">0</div><div class="ml">HANDS</div></div>
-      <div class="meta-cell"><div class="mv gp" id="mGesture">—</div><div class="ml">FINGERS UP</div></div>
+      <div class="meta-cell"><div class="mv gp" id="mGest">—</div><div class="ml">FINGERS↑</div></div>
     </div>
     <div id="aiLog">
-      <div class="ai-line" id="aiLine1">▶ JARVIS SENTINEL ONLINE · READY FOR TRACKING</div>
-      <div class="ai-line" id="aiLine2">▶ POSE ENGINE LOADED · 33 KEYPOINTS · WASM</div>
-      <div class="ai-line" id="aiLine3">▶ HAND ENGINE LOADED · 21 LANDMARKS/HAND</div>
+      <div class="ai-line" id="al1">▶ JARVIS SENTINEL ONLINE · SYSTEMS READY</div>
+      <div class="ai-line" id="al2">▶ POSE ENGINE · 33KP BLAZEPOSE WASM</div>
+      <div class="ai-line" id="al3">▶ HAND ENGINE · 21KP/HAND INTERLEAVED</div>
     </div>
   </div>
 
   <!-- RIGHT TOP: Hand Intelligence -->
   <div class="panel">
     <div class="ptitle">Hand Intelligence</div>
-    <div class="gesture-display">
+    <div class="gesture-box">
       <div class="vl">Active Gesture</div>
-      <div class="gesture-name" id="gestureName">AWAITING</div>
-      <div class="gesture-conf" id="gestureConf">NO HAND IN FRAME</div>
+      <div class="gname" id="gestureName">AWAITING</div>
+      <div class="gconf" id="gestureConf">NO HAND IN FRAME</div>
     </div>
-    <div style="border:1px solid rgba(0,245,255,0.08);padding:8px 10px;background:rgba(0,12,24,0.5);margin-bottom:6px;">
-      <div class="vl" style="margin-bottom:6px;">Finger State</div>
-      <div class="finger-grid" id="fingerGrid">
-        <div class="finger-cell" id="f0">THUMB</div>
-        <div class="finger-cell" id="f1">INDEX</div>
-        <div class="finger-cell" id="f2">MID</div>
-        <div class="finger-cell" id="f3">RING</div>
-        <div class="finger-cell" id="f4">PINKY</div>
+    <div class="gesture-box">
+      <div class="vl" style="margin-bottom:5px;">Finger State</div>
+      <div class="fgrid">
+        <div class="fc" id="f0">THUMB</div>
+        <div class="fc" id="f1">INDEX</div>
+        <div class="fc" id="f2">MID</div>
+        <div class="fc" id="f3">RING</div>
+        <div class="fc" id="f4">PINKY</div>
       </div>
     </div>
-    <div style="border:1px solid rgba(0,245,255,0.08);padding:8px 10px;background:rgba(0,12,24,0.5);">
-      <div class="vl" style="margin-bottom:5px;">Wrist Coordinates</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
-        <div><div class="vl">L · X</div><div style="font-family:'Orbitron',monospace;font-size:10px;color:var(--c);" id="wristLX">—</div></div>
-        <div><div class="vl">L · Y</div><div style="font-family:'Orbitron',monospace;font-size:10px;color:var(--c);" id="wristLY">—</div></div>
-        <div><div class="vl">R · X</div><div style="font-family:'Orbitron',monospace;font-size:10px;color:var(--g);" id="wristRX">—</div></div>
-        <div><div class="vl">R · Y</div><div style="font-family:'Orbitron',monospace;font-size:10px;color:var(--g);" id="wristRY">—</div></div>
+    <div class="wbox">
+      <div class="vl">Wrist Coordinates</div>
+      <div class="wgrid">
+        <div><div class="vl">L·X</div><div class="wval gc" id="wLX">—</div></div>
+        <div><div class="vl">L·Y</div><div class="wval gc" id="wLY">—</div></div>
+        <div><div class="vl">R·X</div><div class="wval gg" id="wRX">—</div></div>
+        <div><div class="vl">R·Y</div><div class="wval gg" id="wRY">—</div></div>
       </div>
     </div>
   </div>
@@ -306,43 +283,40 @@ canvas.wave{width:100%;height:36px;display:block;margin-top:5px;}
     <canvas id="heatCanvas"></canvas>
   </div>
 
-  <!-- RIGHT BOTTOM: System Status -->
-  <div class="panel" style="display:flex;flex-direction:column;gap:6px;overflow-y:auto;">
+  <!-- RIGHT BOTTOM: System -->
+  <div class="panel" style="display:flex;flex-direction:column;gap:5px;overflow-y:auto;">
     <div class="ptitle">System Status</div>
-    <div class="conv-grid">
-      <div class="conv-cell"><div class="cl">Pose Conf</div><div class="cv gg" id="cvConf">0%</div><div class="cbar"><div class="cbar-fill" id="cbConf" style="width:0%"></div></div></div>
-      <div class="conv-cell"><div class="cl">Keypoints</div><div class="cv gc" id="cvKP">0/33</div><div class="cbar"><div class="cbar-fill" id="cbKP" style="width:0%"></div></div></div>
-      <div class="conv-cell"><div class="cl">Frame Rate</div><div class="cv ga" id="cvFps">0fps</div><div class="cbar"><div class="cbar-fill" id="cbFps" style="width:0%;background:var(--a);box-shadow:0 0 4px var(--a);"></div></div></div>
-      <div class="conv-cell"><div class="cl">Detection</div><div class="cv" id="cvDet" style="color:var(--a);">SCAN</div><div class="cbar"><div class="cbar-fill" id="cbDet" style="width:22%;background:var(--a);animation:blink 1s infinite;"></div></div></div>
+    <div class="cgrid">
+      <div class="cc"><div class="cl">Pose Conf</div><div class="cv gg" id="cvConf">0%</div><div class="cbar"><div class="cbar-fill" id="cbConf" style="width:0%"></div></div></div>
+      <div class="cc"><div class="cl">Keypoints</div><div class="cv gc" id="cvKP">0/33</div><div class="cbar"><div class="cbar-fill" id="cbKP" style="width:0%"></div></div></div>
+      <div class="cc"><div class="cl">Frame Rate</div><div class="cv ga" id="cvFps">0fps</div><div class="cbar"><div class="cbar-fill" id="cbFps" style="width:0%;background:var(--a);box-shadow:0 0 4px var(--a)"></div></div></div>
+      <div class="cc"><div class="cl">Detection</div><div class="cv ga" id="cvDet">SCAN</div><div class="cbar"><div class="cbar-fill" id="cbDet" style="width:20%;background:var(--a);animation:blink 1s infinite;"></div></div></div>
     </div>
     <div class="ptitle">Target Roster</div>
-    <div class="person-list" id="personList">
-      <div style="font-size:8px;color:rgba(0,245,255,0.2);letter-spacing:1px;text-align:center;padding:8px;">NO TARGETS DETECTED</div>
-    </div>
+    <div id="personList"><div style="font-size:7px;color:rgba(0,245,255,0.18);text-align:center;padding:7px;">NO TARGETS</div></div>
     <div class="ptitle" style="margin-top:2px;">Sensor Array</div>
-    <div class="nodes-list">
-      <div class="node-row"><div class="ndot on"></div><div class="ni"><div class="nn">WEBCAM · PRIMARY</div><div class="ns">RGB · LOCAL</div></div><div class="nf" id="nfCam">LIVE</div></div>
-      <div class="node-row"><div class="ndot on" style="animation-delay:0.4s"></div><div class="ni"><div class="nn">BLAZEPOSE · 33KP</div><div class="ns">WASM</div></div><div class="nf" id="nfPose">ACTIVE</div></div>
-      <div class="node-row"><div class="ndot on" style="animation-delay:0.8s"></div><div class="ni"><div class="nn">HANDS · 21KP</div><div class="ns">WASM</div></div><div class="nf" id="nfHand">ACTIVE</div></div>
-      <div class="node-row"><div class="ndot dim"></div><div class="ni"><div class="nn">WIFI-CSI · ESP32</div><div class="ns">NOT CONNECTED</div></div><div class="nf" style="color:var(--a);">OFFLINE</div></div>
+    <div class="nodes">
+      <div class="nr"><div class="nd on"></div><div class="ni"><div class="nn">WEBCAM · PRIMARY</div><div class="ns">RGB · LOCAL</div></div><div class="nf" id="nfCam">LIVE</div></div>
+      <div class="nr"><div class="nd on" style="animation-delay:.4s"></div><div class="ni"><div class="nn">BLAZEPOSE · 33KP</div><div class="ns">WASM · COMPLEXITY 0</div></div><div class="nf" id="nfPose">ACTIVE</div></div>
+      <div class="nr"><div class="nd on" style="animation-delay:.8s"></div><div class="ni"><div class="nn">HANDS · 21KP</div><div class="ns">INTERLEAVED · 2 FRAMES</div></div><div class="nf" id="nfHand">ACTIVE</div></div>
+      <div class="nr"><div class="nd dim"></div><div class="ni"><div class="nn">WIFI-CSI · ESP32</div><div class="ns">NOT CONNECTED</div></div><div class="nf" style="color:var(--a);">OFFLINE</div></div>
     </div>
   </div>
+
 </div>
 
 <!-- TICKER -->
 <div id="ticker">
   <div class="tlbl">⬡ JARVIS</div>
-  <div class="ttrack">
-    <span>BLAZEPOSE 33KP + HAND 21KP/HAND · FULL BODY + FINGER TRACKING</span>
-    <span>EXPONENTIAL SMOOTHING · VISIBILITY-WEIGHTED INTERPOLATION · SUB-PIXEL PRECISION</span>
-    <span>GESTURE RECOGNITION · PRESENCE HEATMAP · KINEMATIC ANALYSIS</span>
-    <span>ALL INFERENCE LOCAL · WASM RUNTIME · ZERO DATA TRANSMITTED</span>
-    <span>TIP: STAND 1-2M FROM CAMERA · GOOD LIGHTING · HANDS IN FRAME FOR GESTURE MODE</span>
-    <span>BLAZEPOSE 33KP + HAND 21KP/HAND · FULL BODY + FINGER TRACKING</span>
-    <span>EXPONENTIAL SMOOTHING · VISIBILITY-WEIGHTED INTERPOLATION · SUB-PIXEL PRECISION</span>
-    <span>GESTURE RECOGNITION · PRESENCE HEATMAP · KINEMATIC ANALYSIS</span>
-    <span>ALL INFERENCE LOCAL · WASM RUNTIME · ZERO DATA TRANSMITTED</span>
-    <span>TIP: STAND 1-2M FROM CAMERA · GOOD LIGHTING · HANDS IN FRAME FOR GESTURE MODE</span>
+  <div class="tscroll">
+    <span>RUVIEW SENTINEL · BLAZEPOSE 33KP + HANDS 21KP · INTERLEAVED INFERENCE · LOW LATENCY</span>
+    <span>VISIBILITY-WEIGHTED SMOOTHING · VELOCITY PREDICTION · SUB-PIXEL PRECISION</span>
+    <span>GESTURE RECOGNITION · PRESENCE HEATMAP · KINEMATIC ANALYSIS · ALL LOCAL</span>
+    <span>TIP: GOOD LIGHTING + 1-2M DISTANCE = BEST TRACKING QUALITY</span>
+    <span>RUVIEW SENTINEL · BLAZEPOSE 33KP + HANDS 21KP · INTERLEAVED INFERENCE · LOW LATENCY</span>
+    <span>VISIBILITY-WEIGHTED SMOOTHING · VELOCITY PREDICTION · SUB-PIXEL PRECISION</span>
+    <span>GESTURE RECOGNITION · PRESENCE HEATMAP · KINEMATIC ANALYSIS · ALL LOCAL</span>
+    <span>TIP: GOOD LIGHTING + 1-2M DISTANCE = BEST TRACKING QUALITY</span>
   </div>
 </div>
 
@@ -352,12 +326,14 @@ canvas.wave{width:100%;height:36px;display:block;margin-top:5px;}
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 
 <script>
+'use strict';
+
 // ── CURSOR ────────────────────────────────────────────────────────────────────
 const cursorEl = document.getElementById('cursor');
 if (cursorEl) document.addEventListener('mousemove', e => {
   cursorEl.style.left = e.clientX + 'px';
-  cursorEl.style.top = e.clientY + 'px';
-});
+  cursorEl.style.top  = e.clientY + 'px';
+}, {passive:true});
 
 // ── CLOCK ─────────────────────────────────────────────────────────────────────
 setInterval(() => {
@@ -365,160 +341,131 @@ setInterval(() => {
     new Date().toISOString().replace('T',' ').slice(0,19)+' UTC';
 }, 1000);
 
-// ── UTILS ─────────────────────────────────────────────────────────────────────
-const lerp = (a,b,t) => a+(b-a)*t;
-const clamp = (v,mn,mx) => Math.max(mn,Math.min(mx,v));
-const PI = Math.PI;
+// ── MATH HELPERS ─────────────────────────────────────────────────────────────
+const lerp  = (a,b,t) => a+(b-a)*t;
+const clamp = (v,lo,hi) => v<lo?lo:v>hi?hi:v;
+const PI    = Math.PI;
 
-// ── SMOOTHER ──────────────────────────────────────────────────────────────────
-// Visibility-weighted exponential moving average
-// Higher visibility → landmark pulls buffer harder → snappier on confident detections
-// Lower visibility → weaker pull → holds last good position rather than jittering
-class LandmarkSmoother {
-  constructor(n, baseAlpha=0.4, minAlpha=0.1, maxAlpha=0.7) {
-    this.n = n;
-    this.baseAlpha = baseAlpha;
-    this.minAlpha = minAlpha;
-    this.maxAlpha = maxAlpha;
-    this.buf = null;
-    this.velBuf = null; // velocity for predictive smoothing
+// ── SMOOTH LANDMARKS ─────────────────────────────────────────────────────────
+// Visibility-weighted EMA + simple velocity for jitter-free tracking.
+// alpha scales with visibility so low-confidence points hold position.
+class Smoother {
+  constructor(alpha=0.4, velW=0.35) {
+    this.alpha = alpha;
+    this.velW  = velW;
+    this.buf   = null;
+    this.vel   = null;
   }
-
   update(lms) {
-    if (!lms || lms.length === 0) {
-      // Decay on no detection
-      if (this.buf) {
-        for (let i = 0; i < this.buf.length; i++) {
-          if (this.buf[i]) {
-            this.buf[i].visibility = lerp(this.buf[i].visibility||0, 0, 0.15);
-            if ((this.buf[i].visibility||0) < 0.05) this.buf[i] = null;
-          }
-        }
-      }
+    if (!lms || !lms.length) {
+      // Graceful decay so skeleton doesn't pop off screen
+      if (this.buf) this.buf.forEach(l => { if (l) l.visibility = (l.visibility||0)*0.85; });
       return this.buf;
     }
-
-    if (!this.buf || this.buf.length !== lms.length) {
+    const n = lms.length;
+    if (!this.buf || this.buf.length !== n) {
       this.buf = lms.map(l => l ? {...l} : null);
-      this.velBuf = new Array(lms.length).fill(null).map(() => ({x:0,y:0,z:0}));
+      this.vel = Array.from({length:n}, () => ({x:0,y:0,z:0}));
       return this.buf;
     }
-
-    for (let i = 0; i < lms.length; i++) {
-      const cur = lms[i];
-      const prev = this.buf[i];
-      const vel = this.velBuf[i] || {x:0,y:0,z:0};
-
-      if (!cur) {
-        if (prev) {
-          prev.visibility = lerp(prev.visibility||0, 0, 0.2);
-          if ((prev.visibility||0) < 0.05) this.buf[i] = null;
-        }
-        continue;
-      }
-
-      if (!prev) {
-        this.buf[i] = {...cur};
-        this.velBuf[i] = {x:0,y:0,z:0};
-        continue;
-      }
-
-      // Dynamic alpha based on visibility confidence
+    for (let i = 0; i < n; i++) {
+      const cur = lms[i], prev = this.buf[i], v = this.vel[i];
+      if (!cur) { if (prev) prev.visibility = (prev.visibility||0)*0.8; continue; }
+      if (!prev) { this.buf[i]={...cur}; continue; }
+      // Dynamic alpha: confident points snap harder
       const vis = clamp(cur.visibility !== undefined ? cur.visibility : 1, 0, 1);
-      const alpha = lerp(this.minAlpha, this.maxAlpha, vis);
-
-      // Velocity-assisted smoothing: blend current velocity into prediction
-      const vAlpha = 0.35;
-      vel.x = lerp(vel.x, cur.x - prev.x, vAlpha);
-      vel.y = lerp(vel.y, cur.y - prev.y, vAlpha);
-      vel.z = lerp(vel.z, (cur.z||0) - (prev.z||0), vAlpha);
-
-      // Predicted position
-      const px = prev.x + vel.x * 0.4;
-      const py = prev.y + vel.y * 0.4;
-      const pz = (prev.z||0) + vel.z * 0.4;
-
+      const a   = this.alpha + (1-this.alpha)*vis*0.45;
+      // Update velocity estimate
+      v.x = lerp(v.x, cur.x-prev.x, this.velW);
+      v.y = lerp(v.y, cur.y-prev.y, this.velW);
+      v.z = lerp(v.z, (cur.z||0)-(prev.z||0), this.velW);
+      // Blend predicted + observed
       this.buf[i] = {
-        x: lerp(px, cur.x, alpha),
-        y: lerp(py, cur.y, alpha),
-        z: lerp(pz, cur.z||0, alpha),
-        visibility: lerp(prev.visibility||0, vis, 0.45)
+        x: lerp(prev.x + v.x*0.35, cur.x, a),
+        y: lerp(prev.y + v.y*0.35, cur.y, a),
+        z: lerp((prev.z||0) + v.z*0.35, cur.z||0, a),
+        visibility: lerp(prev.visibility||0, vis, 0.4)
       };
-      this.velBuf[i] = vel;
     }
     return this.buf;
   }
-
-  reset() { this.buf = null; this.velBuf = null; }
+  reset() { this.buf = null; this.vel = null; }
 }
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
-let fps = 0, fpsFrames = 0, fpsLast = performance.now();
-let motionHistory = new Float32Array(80).fill(0);
-let prevLandmarks = null, motionMag = 0;
-const HEAT_W = 28, HEAT_H = 20;
-const heatGrid = Array.from({length:HEAT_H}, () => new Float32Array(HEAT_W));
+let fps=0, fpsFrames=0, fpsLast=performance.now();
+let motionHistory = new Float32Array(80);
+let prevPoseLms = null, motionMag = 0;
 
-const poseSmoother = new LandmarkSmoother(33, 0.38, 0.1, 0.72);
-const handSmoothers = [
-  new LandmarkSmoother(21, 0.42, 0.15, 0.78),
-  new LandmarkSmoother(21, 0.42, 0.15, 0.78)
-];
+const HEAT_W=28, HEAT_H=20;
+const heatGrid = Array.from({length:HEAT_H}, ()=>new Float32Array(HEAT_W));
+
+const poseSmoother  = new Smoother(0.38, 0.32);
+const handSmootherL = new Smoother(0.45, 0.4);
+const handSmootherR = new Smoother(0.45, 0.4);
 
 let smoothPose = null;
-let smoothHands = [{lms:null,label:'',score:0},{lms:null,label:'',score:0}];
+// hands: [{lms, label, score}]
+let smoothHands = [{lms:null,label:'Left',score:0},{lms:null,label:'Right',score:0}];
 
-// ── JARVIS AI LOG ─────────────────────────────────────────────────────────────
-const JARVIS_LINES = [
-  "POSE TRACKING ACTIVE · 33 KEYPOINTS NOMINAL",
-  "HAND MODEL ENGAGED · FINGER RESOLUTION ENABLED",
-  "PRESENCE HEATMAP DECAYING · GRID 28×20",
-  "SCANNING FOR BIOLOGICAL SIGNATURES",
-  "SHOULDER GEOMETRY CALIBRATING",
-  "MOTION BASELINE ESTABLISHED",
-  "GESTURE LIBRARY READY · 9 PATTERNS LOADED",
-  "TORSO KINEMATIC CHAIN NOMINAL",
-  "VISIBILITY-WEIGHTED SMOOTHING ACTIVE",
-  "VELOCITY PREDICTION ENGAGED",
-  "TRACKING LOCK CONFIRMED",
-  "WRIST TELEMETRY STREAMING",
-  "FINGER STATE UPDATING IN REAL-TIME",
+// ── JARVIS LOG ────────────────────────────────────────────────────────────────
+const JLINES = [
+  'POSE TRACKING NOMINAL · 33 KEYPOINTS ACTIVE',
+  'HAND MODEL ENGAGED · FINGER RESOLUTION ENABLED',
+  'INTERLEAVED PIPELINE RUNNING · LATENCY MINIMIZED',
+  'VISIBILITY-WEIGHTED SMOOTHER ACTIVE',
+  'VELOCITY PREDICTION ENGAGED',
+  'PRESENCE HEATMAP UPDATING · 28×20 GRID',
+  'GESTURE LIBRARY READY · 9 PATTERNS',
+  'WRIST TELEMETRY STREAMING',
+  'KINEMATIC CHAIN ANALYSIS RUNNING',
+  'SCANNING FOR BIOLOGICAL SIGNATURES',
+  'SHOULDER GEOMETRY CALIBRATED',
+  'MOTION BASELINE ESTABLISHED',
+  'TRACKING LOCK CONFIRMED',
 ];
 let jIdx = 0;
 function pushJarvis(msg) {
-  const ids = ['aiLine1','aiLine2','aiLine3'];
-  document.getElementById(ids[0]).textContent = document.getElementById(ids[1]).textContent;
-  document.getElementById(ids[1]).textContent = document.getElementById(ids[2]).textContent;
-  const el = document.getElementById(ids[2]);
-  el.textContent = '▶ ' + msg;
-  el.style.animation = 'none'; void el.offsetWidth; el.style.animation = 'fadeIn 0.35s ease';
+  document.getElementById('al1').textContent = document.getElementById('al2').textContent;
+  document.getElementById('al2').textContent = document.getElementById('al3').textContent;
+  document.getElementById('al3').textContent = '▶ ' + msg;
 }
-setInterval(() => { pushJarvis(JARVIS_LINES[jIdx++ % JARVIS_LINES.length]); }, 4000);
+setInterval(() => pushJarvis(JLINES[jIdx++ % JLINES.length]), 4000);
 
 // ── CANVASES ──────────────────────────────────────────────────────────────────
 const poseCanvas = document.getElementById('poseCanvas');
-const poseCtx = poseCanvas.getContext('2d');
+const poseCtx    = poseCanvas.getContext('2d', {alpha:true, desynchronized:true});
 const heatCanvas = document.getElementById('heatCanvas');
-const heatCtx = heatCanvas.getContext('2d');
-const motionWaveCanvas = document.getElementById('motionWave');
-const motionWaveCtx = motionWaveCanvas.getContext('2d');
+const heatCtx    = heatCanvas.getContext('2d', {alpha:true});
+const waveCanvas = document.getElementById('motionWave');
+const waveCtx    = waveCanvas.getContext('2d', {alpha:true});
 
-function resizeCanvases() {
-  heatCanvas.width = heatCanvas.clientWidth || 200;
+function resizeAll() {
+  heatCanvas.width  = heatCanvas.clientWidth  || 200;
   heatCanvas.height = heatCanvas.clientHeight || 160;
-  motionWaveCanvas.width = motionWaveCanvas.clientWidth || 180;
-  motionWaveCanvas.height = 36;
+  waveCanvas.width  = waveCanvas.clientWidth  || 180;
+  waveCanvas.height = 34;
 }
 
-// ── CONNECTIONS ───────────────────────────────────────────────────────────────
+// ── DRAW CONNECTIONS (single shadow state, no repeated set) ───────────────────
 const BODY_CONN = [
+  // face
   [0,1],[1,2],[2,3],[3,7],[0,4],[4,5],[5,6],[6,8],[9,10],
-  [11,12],[11,13],[13,15],[15,17],[15,19],[17,19],
-  [12,14],[14,16],[16,18],[16,20],[18,20],
+  // arms
+  [11,12],[11,13],[13,15],[15,17],[15,19],[17,19],[12,14],[14,16],[16,18],[16,20],[18,20],
+  // torso
   [11,23],[12,24],[23,24],
-  [23,25],[25,27],[27,29],[27,31],[29,31],
-  [24,26],[26,28],[28,30],[28,32],[30,32]
+  // legs
+  [23,25],[25,27],[27,29],[27,31],[29,31],[24,26],[26,28],[28,30],[28,32],[30,32]
 ];
+// Precomputed segment colours indexed by connection index
+const BODY_CONN_COL = BODY_CONN.map(([a]) => {
+  if (a<=10)          return '#00ccff';
+  if (a>=11&&a<=16)   return '#00ff88';
+  if (a>=23&&a<=24)   return '#ffcc00';
+  if (a>=25)          return '#ff9900';
+  return '#00f5ff';
+});
 
 const HAND_CONN = [
   [0,1],[1,2],[2,3],[3,4],
@@ -528,179 +475,152 @@ const HAND_CONN = [
   [0,17],[17,18],[18,19],[19,20],
   [5,9],[9,13],[13,17]
 ];
+const FCOLS = ['#ff4466','#00ff88','#00ccff','#cc44ff','#ffcc00'];
+const HAND_CONN_COL = HAND_CONN.map(([a,b]) => {
+  if (a<=4||b<=4)   return FCOLS[0];
+  if (a<=8||b<=8)   return FCOLS[1];
+  if (a<=12||b<=12) return FCOLS[2];
+  if (a<=16||b<=16) return FCOLS[3];
+  return FCOLS[4];
+});
+const FINGERTIPS = [4,8,12,16,20];
 
-function bodyColor(a, b) {
-  if (a<=10||b<=10)         return '#00ccff'; // face
-  if ((a>=11&&a<=16)||(b>=11&&b<=16)) return '#00ff88'; // arms
-  if ((a>=23&&a<=24)||(b>=23&&b<=24)) return '#ffcc00'; // hips
-  if (a>=25||b>=25)         return '#ff9900'; // legs
-  return '#00f5ff';
-}
-const FINGER_COLORS = ['#ff4466','#00ff88','#00ccff','#cc44ff','#ffcc00'];
-function handColor(a, b) {
-  if (a<=4||b<=4)   return FINGER_COLORS[0];
-  if (a<=8||b<=8)   return FINGER_COLORS[1];
-  if (a<=12||b<=12) return FINGER_COLORS[2];
-  if (a<=16||b<=16) return FINGER_COLORS[3];
-  return FINGER_COLORS[4];
-}
-
-// ── DRAW BODY ─────────────────────────────────────────────────────────────────
+// ── BODY DRAW ─────────────────────────────────────────────────────────────────
 function drawBody(lms, W, H) {
-  if (!lms) return;
   const ctx = poseCtx;
   ctx.lineCap = 'round';
+  ctx.lineWidth = 2.5;
 
-  BODY_CONN.forEach(([a,b]) => {
+  // One shadow setup for connections
+  ctx.shadowBlur = 8;
+  for (let i = 0; i < BODY_CONN.length; i++) {
+    const [a,b] = BODY_CONN[i];
     const la=lms[a], lb=lms[b];
-    if (!la||!lb) return;
+    if (!la||!lb) continue;
     const va=la.visibility||0, vb=lb.visibility||0;
-    if (va<0.25||vb<0.25) return;
-    const ax=(1-la.x)*W, ay=la.y*H;
-    const bx=(1-lb.x)*W, by=lb.y*H;
-    const color = bodyColor(a,b);
-    ctx.beginPath();
-    ctx.strokeStyle = color;
+    if (va<0.22||vb<0.22) continue;
+    const color = BODY_CONN_COL[i];
     ctx.globalAlpha = Math.min(va,vb)*0.88;
-    ctx.lineWidth = 2.5;
-    ctx.shadowColor = color; ctx.shadowBlur = 9;
-    ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke();
-  });
+    ctx.strokeStyle = color;
+    ctx.shadowColor = color;
+    ctx.beginPath();
+    ctx.moveTo((1-la.x)*W, la.y*H);
+    ctx.lineTo((1-lb.x)*W, lb.y*H);
+    ctx.stroke();
+  }
 
-  lms.forEach((lm,i) => {
-    if (!lm||(lm.visibility||0)<0.35) return;
+  // Joints
+  ctx.shadowBlur = 12;
+  for (let i = 0; i < lms.length; i++) {
+    const lm=lms[i]; if (!lm||(lm.visibility||0)<0.32) continue;
     const x=(1-lm.x)*W, y=lm.y*H;
     let color='#00f5ff', r=3;
     if (i===0)           { color='#ffffff'; r=5; }
-    else if (i>=11&&i<=16) { color='#00ff88'; r=3.5; }
-    else if (i>=23&&i<=24) { color='#ffcc00'; r=3.5; }
-    else if (i>=25)        { color='#ff9900'; r=3; }
-    ctx.beginPath();
-    ctx.arc(x,y,r,0,PI*2);
-    ctx.fillStyle=color; ctx.globalAlpha=lm.visibility||0;
-    ctx.shadowColor=color; ctx.shadowBlur=14;
-    ctx.fill();
-  });
-  ctx.globalAlpha=1; ctx.shadowBlur=0;
-}
-
-// ── DRAW HAND ─────────────────────────────────────────────────────────────────
-function drawHand(lms, W, H, label) {
-  if (!lms) return;
-  const ctx = poseCtx;
-  ctx.lineCap = 'round';
-
-  // Palm fill
-  const palmIdx = [0,1,5,9,13,17,0];
-  ctx.beginPath();
-  palmIdx.forEach((i,j) => {
-    const p=lms[i]; if (!p) return;
-    const x=(1-p.x)*W, y=p.y*H;
-    j===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-  });
-  ctx.fillStyle='rgba(0,245,255,0.04)'; ctx.fill();
-
-  HAND_CONN.forEach(([a,b]) => {
-    const la=lms[a], lb=lms[b]; if (!la||!lb) return;
-    const ax=(1-la.x)*W, ay=la.y*H;
-    const bx=(1-lb.x)*W, by=lb.y*H;
-    const color=handColor(a,b);
-    ctx.beginPath();
-    ctx.strokeStyle=color; ctx.globalAlpha=0.88;
-    ctx.lineWidth=2; ctx.shadowColor=color; ctx.shadowBlur=7;
-    ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke();
-  });
-
-  // Fingertips glow ring
-  [4,8,12,16,20].forEach((i,fi) => {
-    const lm=lms[i]; if (!lm) return;
-    const x=(1-lm.x)*W, y=lm.y*H;
-    const color=FINGER_COLORS[fi];
-    ctx.beginPath(); ctx.arc(x,y,5,0,PI*2);
-    ctx.strokeStyle=color; ctx.globalAlpha=0.5; ctx.lineWidth=1.5;
-    ctx.shadowColor=color; ctx.shadowBlur=10; ctx.stroke();
-    ctx.beginPath(); ctx.arc(x,y,3,0,PI*2);
-    ctx.fillStyle=color; ctx.globalAlpha=1; ctx.shadowBlur=16; ctx.fill();
-  });
-
-  // Other joints
-  lms.forEach((lm,i) => {
-    if (!lm||[4,8,12,16,20].includes(i)) return;
-    const x=(1-lm.x)*W, y=lm.y*H;
-    const fi = i===0?-1: i<=4?0: i<=8?1: i<=12?2: i<=16?3: 4;
-    const color = fi<0?'#ffffff':FINGER_COLORS[fi];
-    ctx.beginPath(); ctx.arc(x,y,2,0,PI*2);
-    ctx.fillStyle=color; ctx.globalAlpha=0.85;
-    ctx.shadowColor=color; ctx.shadowBlur=7; ctx.fill();
-  });
-
-  // Wrist label
-  if (lms[0]) {
-    const wx=(1-lms[0].x)*W, wy=lms[0].y*H;
-    const color=label==='Left'?'#00f5ff':'#00ff88';
-    ctx.globalAlpha=0.75; ctx.fillStyle=color;
-    ctx.font='7px "Share Tech Mono"'; ctx.textAlign='center';
-    ctx.shadowColor=color; ctx.shadowBlur=8;
-    ctx.fillText(label.toUpperCase()+' HAND', wx, wy+16);
+    else if (i>=11&&i<=16){ color='#00ff88'; r=3.5; }
+    else if (i>=23&&i<=24){ color='#ffcc00'; r=3.5; }
+    else if (i>=25)       { color='#ff9900'; r=3; }
+    ctx.globalAlpha = lm.visibility||0;
+    ctx.fillStyle   = color;
+    ctx.shadowColor = color;
+    ctx.beginPath(); ctx.arc(x,y,r,0,PI*2); ctx.fill();
   }
   ctx.globalAlpha=1; ctx.shadowBlur=0;
 }
 
-// ── BOUNDING BOX ──────────────────────────────────────────────────────────────
-function drawBBox(lms, W, H) {
-  const vis = lms.filter(l=>l&&(l.visibility||0)>0.38);
-  if (vis.length < 4) return;
+// ── HAND DRAW ─────────────────────────────────────────────────────────────────
+function drawHand(lms, W, H, label) {
+  const ctx = poseCtx;
+  ctx.lineCap  = 'round';
+  ctx.lineWidth = 2;
+  ctx.shadowBlur = 7;
+  ctx.globalAlpha = 0.88;
 
-  let mnX=1,mxX=0,mnY=1,mxY=0;
-  vis.forEach(l=>{mnX=Math.min(mnX,l.x);mxX=Math.max(mxX,l.x);mnY=Math.min(mnY,l.y);mxY=Math.max(mxY,l.y);});
+  for (let i = 0; i < HAND_CONN.length; i++) {
+    const [a,b] = HAND_CONN[i];
+    const la=lms[a], lb=lms[b]; if (!la||!lb) continue;
+    const color = HAND_CONN_COL[i];
+    ctx.strokeStyle = color; ctx.shadowColor = color;
+    ctx.beginPath();
+    ctx.moveTo((1-la.x)*W, la.y*H);
+    ctx.lineTo((1-lb.x)*W, lb.y*H);
+    ctx.stroke();
+  }
 
-  const pad=0.025;
-  const bx=(1-(mxX+pad))*W, by=(mnY-pad)*H;
-  const bw=(mxX-mnX+pad*2)*W, bh=(mxY-mnY+pad*2)*H;
-  const color='#00ff88';
-  const ctx=poseCtx;
+  // Fingertips: glow ring + dot
+  ctx.shadowBlur = 14;
+  ctx.globalAlpha = 1;
+  for (let fi = 0; fi < FINGERTIPS.length; fi++) {
+    const lm = lms[FINGERTIPS[fi]]; if (!lm) continue;
+    const x=(1-lm.x)*W, y=lm.y*H;
+    const color = FCOLS[fi];
+    ctx.strokeStyle=color; ctx.shadowColor=color;
+    ctx.lineWidth=1.5; ctx.globalAlpha=0.5;
+    ctx.beginPath(); ctx.arc(x,y,5,0,PI*2); ctx.stroke();
+    ctx.fillStyle=color; ctx.globalAlpha=1;
+    ctx.lineWidth=0;
+    ctx.beginPath(); ctx.arc(x,y,3,0,PI*2); ctx.fill();
+  }
 
-  ctx.globalAlpha=0.6; ctx.strokeStyle=color; ctx.lineWidth=1;
-  ctx.shadowColor=color; ctx.shadowBlur=10;
-  ctx.setLineDash([4,4]); ctx.strokeRect(bx,by,bw,bh);
-  ctx.setLineDash([]);
+  // Other joints
+  ctx.shadowBlur=6; ctx.globalAlpha=0.82;
+  for (let i=0;i<lms.length;i++) {
+    if (FINGERTIPS.includes(i)||i===0) continue;
+    const lm=lms[i]; if (!lm) continue;
+    const x=(1-lm.x)*W, y=lm.y*H;
+    const fi = i<=4?0: i<=8?1: i<=12?2: i<=16?3: 4;
+    const color = FCOLS[fi];
+    ctx.fillStyle=color; ctx.shadowColor=color;
+    ctx.beginPath(); ctx.arc(x,y,2,0,PI*2); ctx.fill();
+  }
 
-  // Bold corners
-  const cs=14;
-  ctx.globalAlpha=1; ctx.lineWidth=2.5; ctx.shadowBlur=14;
-  [[bx,by,1,1],[bx+bw,by,-1,1],[bx,by+bh,1,-1],[bx+bw,by+bh,-1,-1]].forEach(([cx,cy,dx,dy]) => {
-    ctx.beginPath(); ctx.moveTo(cx+dx*cs,cy); ctx.lineTo(cx,cy); ctx.lineTo(cx,cy+dy*cs); ctx.stroke();
-  });
-
-  // Label
-  const conf=Math.round(vis.length/33*100);
-  const label=`TARGET-ALPHA  ${conf}%`;
-  ctx.font='bold 8px "Orbitron"';
-  const tw=ctx.measureText(label).width;
-  ctx.globalAlpha=0.92;
-  ctx.fillStyle='rgba(0,4,12,0.88)'; ctx.fillRect(bx,by-17,tw+14,15);
-  ctx.strokeStyle=color; ctx.lineWidth=1; ctx.strokeRect(bx,by-17,tw+14,15);
-  ctx.fillStyle=color; ctx.textAlign='left'; ctx.shadowBlur=8;
-  ctx.fillText(label, bx+7, by-5);
-
+  // Wrist label
+  const w=lms[0]; if (w) {
+    const color = label==='Left'?'#00f5ff':'#00ff88';
+    ctx.globalAlpha=0.7; ctx.fillStyle=color; ctx.shadowColor=color; ctx.shadowBlur=7;
+    ctx.font='7px "Share Tech Mono"'; ctx.textAlign='center';
+    ctx.fillText(label.toUpperCase()+' HAND', (1-w.x)*W, w.y*H+15);
+  }
   ctx.globalAlpha=1; ctx.shadowBlur=0;
 }
 
-// ── GESTURE RECOGNITION ───────────────────────────────────────────────────────
-function fingerStates(lms) {
-  if (!lms || lms.length < 21) return [false,false,false,false,false];
-  // Thumb: compare tip x to MCP x (mirrored view)
-  const thumbUp = (1-lms[4].x) < (1-lms[2].x) - 0.018;
-  const rest = [8,12,16,20].map((tip,i) => {
-    const base = [6,10,14,18][i];
-    return lms[tip].y < lms[base].y - 0.022;
+// ── BBOX ──────────────────────────────────────────────────────────────────────
+function drawBBox(lms, W, H) {
+  const vis=lms.filter(l=>l&&(l.visibility||0)>0.36);
+  if (vis.length<4) return;
+  let mnX=1,mxX=0,mnY=1,mxY=0;
+  vis.forEach(l=>{mnX=Math.min(mnX,l.x);mxX=Math.max(mxX,l.x);mnY=Math.min(mnY,l.y);mxY=Math.max(mxY,l.y);});
+  const pd=0.025;
+  const bx=(1-(mxX+pd))*W, by=(mnY-pd)*H, bw=(mxX-mnX+pd*2)*W, bh=(mxY-mnY+pd*2)*H;
+  const ctx=poseCtx, color='#00ff88';
+  ctx.strokeStyle=color; ctx.shadowColor=color; ctx.shadowBlur=10;
+  ctx.globalAlpha=0.55; ctx.lineWidth=1;
+  ctx.setLineDash([4,4]); ctx.strokeRect(bx,by,bw,bh); ctx.setLineDash([]);
+  // Corners
+  const cs=13; ctx.globalAlpha=1; ctx.lineWidth=2.5; ctx.shadowBlur=13;
+  [[bx,by,1,1],[bx+bw,by,-1,1],[bx,by+bh,1,-1],[bx+bw,by+bh,-1,-1]].forEach(([cx,cy,dx,dy])=>{
+    ctx.beginPath(); ctx.moveTo(cx+dx*cs,cy); ctx.lineTo(cx,cy); ctx.lineTo(cx,cy+dy*cs); ctx.stroke();
   });
-  return [thumbUp, ...rest];
+  // Label
+  const conf=Math.round(vis.length/33*100);
+  ctx.font='bold 8px "Orbitron"'; ctx.shadowBlur=7;
+  const tw=ctx.measureText('TARGET-A  '+conf+'%').width;
+  ctx.fillStyle='rgba(0,4,12,0.88)'; ctx.globalAlpha=0.92;
+  ctx.fillRect(bx,by-15,tw+14,14);
+  ctx.strokeStyle=color; ctx.lineWidth=1; ctx.strokeRect(bx,by-15,tw+14,14);
+  ctx.fillStyle=color; ctx.textAlign='left'; ctx.shadowBlur=7;
+  ctx.fillText('TARGET-A  '+conf+'%', bx+7, by-4);
+  ctx.globalAlpha=1; ctx.shadowBlur=0;
 }
 
-function recognizeGesture(f) {
-  const [th,ix,mi,ri,pi] = f;
-  const n = f.filter(Boolean).length;
+// ── GESTURE ───────────────────────────────────────────────────────────────────
+function fingerStates(lms) {
+  if (!lms||lms.length<21) return [false,false,false,false,false];
+  const th = (1-lms[4].x) < (1-lms[2].x)-0.016;
+  const rest = [[8,6],[12,10],[16,14],[20,18]].map(([tip,base])=>lms[tip].y < lms[base].y-0.02);
+  return [th,...rest];
+}
+function gesture(f) {
+  const [th,ix,mi,ri,pi]=f, n=f.filter(Boolean).length;
   if (!th&&!ix&&!mi&&!ri&&!pi) return '✊ FIST';
   if ( th&& ix&& mi&& ri&& pi) return '🖐 OPEN HAND';
   if (!th&& ix&&!mi&&!ri&&!pi) return '☝ POINT';
@@ -709,18 +629,17 @@ function recognizeGesture(f) {
   if ( th&& ix&&!mi&&!ri&&!pi) return '🤏 PINCH';
   if (!th&& ix&& mi&& ri&& pi) return '🤘 ROCK ON';
   if ( th&&!ix&&!mi&&!ri&&!pi) return '👍 THUMBS UP';
-  if (!th&&!ix&&!mi&&!ri&& pi) return '🤙 PINKY OUT';
-  if ( n===3)                   return '3️⃣  THREE';
-  if ( n===4)                   return '4️⃣  FOUR';
+  if ( n===3) return '3️⃣ THREE';
   return `${n} FINGERS`;
 }
 
 // ── HEATMAP ───────────────────────────────────────────────────────────────────
-function addToHeat(lms) {
+const HEAT_PTS = [0,11,12,23,24,15,16,27,28];
+function addHeat(lms) {
   for (let y=0;y<HEAT_H;y++) for (let x=0;x<HEAT_W;x++) heatGrid[y][x]*=0.945;
   if (!lms) return;
-  [0,11,12,23,24,15,16,27,28].forEach(i=>{
-    const lm=lms[i]; if (!lm||(lm.visibility||0)<0.32) return;
+  HEAT_PTS.forEach(i=>{
+    const lm=lms[i]; if (!lm||(lm.visibility||0)<0.3) return;
     const gx=clamp(Math.floor((1-lm.x)*HEAT_W),0,HEAT_W-1);
     const gy=clamp(Math.floor(lm.y*HEAT_H),0,HEAT_H-1);
     for (let dy=-2;dy<=2;dy++) for (let dx=-2;dx<=2;dx++) {
@@ -730,33 +649,44 @@ function addToHeat(lms) {
   });
 }
 
-function drawHeatmap() {
+// Reuse ImageData for heatmap — avoid object churn
+let heatImageData = null;
+function drawHeat() {
   const W=heatCanvas.width, H=heatCanvas.height;
-  heatCtx.clearRect(0,0,W,H);
-  const cw=W/HEAT_W, ch=H/HEAT_H;
-  for (let y=0;y<HEAT_H;y++) for (let x=0;x<HEAT_W;x++) {
-    const v=heatGrid[y][x]; if (v<0.01) continue;
-    heatCtx.fillStyle=`rgba(${Math.floor(v*v*255)},${Math.floor(lerp(30,210,v))},${Math.floor(lerp(60,80,v))},${v*0.92})`;
-    heatCtx.fillRect(x*cw,y*ch,cw+0.5,ch+0.5);
+  if (!heatImageData || heatImageData.width!==W || heatImageData.height!==H) {
+    heatImageData = heatCtx.createImageData(W, H);
   }
+  const d=heatImageData.data;
+  const cw=W/HEAT_W, ch=H/HEAT_H;
+  // Fill transparent
+  d.fill(0);
+  for (let cy=0;cy<HEAT_H;cy++) for (let cx=0;cx<HEAT_W;cx++) {
+    const v=heatGrid[cy][cx]; if (v<0.01) continue;
+    const r=Math.floor(v*v*255), g=Math.floor(lerp(30,210,v)), b=Math.floor(lerp(60,80,v));
+    const a=Math.floor(v*0.9*255);
+    const x0=Math.floor(cx*cw), y0=Math.floor(cy*ch);
+    const x1=Math.floor((cx+1)*cw), y1=Math.floor((cy+1)*ch);
+    for (let py=y0;py<y1&&py<H;py++) for (let px=x0;px<x1&&px<W;px++) {
+      const idx=(py*W+px)*4; d[idx]=r; d[idx+1]=g; d[idx+2]=b; d[idx+3]=a;
+    }
+  }
+  heatCtx.putImageData(heatImageData,0,0);
+  // Grid overlay
   heatCtx.strokeStyle='rgba(0,245,255,0.04)'; heatCtx.lineWidth=0.5;
-  for (let x=0;x<=HEAT_W;x++){heatCtx.beginPath();heatCtx.moveTo(x*cw,0);heatCtx.lineTo(x*cw,H);heatCtx.stroke();}
-  for (let y=0;y<=HEAT_H;y++){heatCtx.beginPath();heatCtx.moveTo(0,y*ch);heatCtx.lineTo(W,y*ch);heatCtx.stroke();}
+  const cwa=W/HEAT_W, cha=H/HEAT_H;
+  for (let x=0;x<=HEAT_W;x++){heatCtx.beginPath();heatCtx.moveTo(x*cwa,0);heatCtx.lineTo(x*cwa,H);heatCtx.stroke();}
+  for (let y=0;y<=HEAT_H;y++){heatCtx.beginPath();heatCtx.moveTo(0,y*cha);heatCtx.lineTo(W,y*cha);heatCtx.stroke();}
   heatCtx.strokeStyle='rgba(0,245,255,0.1)'; heatCtx.lineWidth=1;
   heatCtx.strokeRect(0.5,0.5,W-1,H-1);
 }
 
-function drawMotionWave() {
-  const W=motionWaveCanvas.width, H=motionWaveCanvas.height;
-  motionWaveCtx.clearRect(0,0,W,H);
-  motionWaveCtx.beginPath();
-  motionWaveCtx.strokeStyle='#ffcc00'; motionWaveCtx.lineWidth=1.5;
-  motionWaveCtx.shadowColor='#ffcc00'; motionWaveCtx.shadowBlur=5;
-  motionHistory.forEach((v,i)=>{
-    const x=i/motionHistory.length*W, y=H-v*H*0.82-2;
-    i===0?motionWaveCtx.moveTo(x,y):motionWaveCtx.lineTo(x,y);
-  });
-  motionWaveCtx.stroke(); motionWaveCtx.shadowBlur=0;
+function drawWave() {
+  const W=waveCanvas.width, H=waveCanvas.height;
+  waveCtx.clearRect(0,0,W,H);
+  waveCtx.beginPath(); waveCtx.strokeStyle='#ffcc00'; waveCtx.lineWidth=1.5;
+  waveCtx.shadowColor='#ffcc00'; waveCtx.shadowBlur=5;
+  motionHistory.forEach((v,i)=>{ const x=i/motionHistory.length*W, y=H-v*H*0.82-2; i?waveCtx.lineTo(x,y):waveCtx.moveTo(x,y); });
+  waveCtx.stroke(); waveCtx.shadowBlur=0;
 }
 
 // ── FPS ───────────────────────────────────────────────────────────────────────
@@ -774,218 +704,187 @@ function countFps() {
   }
 }
 
-// ── UI UPDATE ─────────────────────────────────────────────────────────────────
-function updatePersonCard(lms) {
-  const list=document.getElementById('personList');
-  if (!lms) {
-    list.innerHTML='<div style="font-size:8px;color:rgba(0,245,255,0.18);letter-spacing:1px;text-align:center;padding:8px;">NO TARGETS DETECTED</div>';
-    return;
-  }
-  const visible=lms.filter(l=>l&&(l.visibility||0)>0.5).length;
-  const conf=Math.round(lms.reduce((s,l)=>s+(l?l.visibility||0:0),0)/lms.length*100);
-  list.innerHTML=`
-    <div class="person-card" style="border-color:var(--P0);box-shadow:0 0 8px rgba(0,255,136,0.08);">
-      <div class="person-avatar" style="border-color:var(--P0);color:var(--P0);">A</div>
-      <div class="person-info">
-        <div class="person-id" style="color:var(--P0);">TARGET-ALPHA</div>
-        <div class="person-stats">${visible}/33 KP VISIBLE · LOCK</div>
-      </div>
-      <div class="person-conf" style="color:var(--P0);">${conf}%</div>
-    </div>`;
-}
+// ── UI UPDATES (batched, avoid layout thrash) ─────────────────────────────────
+const $ = id => document.getElementById(id);
 
-function updateHandPanel(hands) {
-  const primary=hands.find(h=>h.lms)||null;
-  const labels=['THUMB','INDEX','MID','RING','PINKY'];
-  if (primary&&primary.lms) {
-    const ext=fingerStates(primary.lms);
-    ext.forEach((up,i)=>{
-      const el=document.getElementById('f'+i);
-      el.className='finger-cell'+(up?' up':'');
-    });
-    document.getElementById('gestureName').textContent=recognizeGesture(ext);
-    document.getElementById('gestureConf').textContent=
-      `HAND: ${primary.label.toUpperCase()} · ${Math.round(primary.score*100)}%`;
-    document.getElementById('mGesture').textContent=ext.filter(Boolean).length;
-
-    const lh=hands.find(h=>h.label==='Left'), rh=hands.find(h=>h.label==='Right');
-    const p=v=>Math.round(v*100)+'%';
-    document.getElementById('wristLX').textContent=lh&&lh.lms?p(lh.lms[0].x):'—';
-    document.getElementById('wristLY').textContent=lh&&lh.lms?p(lh.lms[0].y):'—';
-    document.getElementById('wristRX').textContent=rh&&rh.lms?p(rh.lms[0].x):'—';
-    document.getElementById('wristRY').textContent=rh&&rh.lms?p(rh.lms[0].y):'—';
-  } else {
-    for (let i=0;i<5;i++) document.getElementById('f'+i).className='finger-cell';
-    document.getElementById('gestureName').textContent='AWAITING';
-    document.getElementById('gestureConf').textContent='NO HAND IN FRAME';
-    document.getElementById('mGesture').textContent='—';
-    ['wristLX','wristLY','wristRX','wristRY'].forEach(id=>document.getElementById(id).textContent='—');
-  }
-  document.getElementById('mHands').textContent=hands.filter(h=>h.lms).length;
-}
-
-function updatePosePanel(lms) {
-  if (!lms) {
-    document.getElementById('cvDet').textContent='SCANNING'; document.getElementById('cvDet').className='cv';
-    document.getElementById('cvDet').style.color='var(--a)';
-    document.getElementById('cbDet').style.cssText='width:18%;background:var(--a);';
-    document.getElementById('mPersons').textContent='0';
-    document.getElementById('mConf').textContent='0%';
-    document.getElementById('kpInfo').innerHTML='TARGETS: 0<br>POSE KP: 0<br>HANDS: —<br>CONF: 0%';
-    updatePersonCard(null);
+function updatePoseUI(lms) {
+  if (!lms || !lms.some(l=>l&&(l.visibility||0)>0.35)) {
+    $('cvDet').textContent='SCANNING'; $('cvDet').style.color='var(--a)';
+    $('cbDet').style.cssText='width:18%;background:var(--a);animation:blink 1s infinite;';
+    $('mPersons').textContent='0'; $('mConf').textContent='0%';
+    $('kpInfo').innerHTML='TARGETS: 0<br>POSE KP: 0<br>HANDS: —<br>CONF: 0%';
+    $('personList').innerHTML='<div style="font-size:7px;color:rgba(0,245,255,0.18);text-align:center;padding:7px;">NO TARGETS</div>';
     return;
   }
   const vis=lms.filter(l=>l&&(l.visibility||0)>0.5).length;
   const conf=lms.reduce((s,l)=>s+(l?l.visibility||0:0),0)/lms.length;
   const pct=n=>Math.round(n*100);
 
-  document.getElementById('cvConf').textContent=pct(conf)+'%';
-  document.getElementById('cbConf').style.width=pct(conf)+'%';
-  document.getElementById('cvKP').textContent=vis+'/33';
-  document.getElementById('cbKP').style.width=(vis/33*100)+'%';
-  document.getElementById('cvDet').textContent='LOCKED'; document.getElementById('cvDet').className='cv gg';
-  document.getElementById('cbDet').style.cssText='width:100%;background:var(--g);box-shadow:0 0 4px var(--g);';
-  document.getElementById('mPersons').textContent=vis>5?'1':'0';
-  document.getElementById('mConf').textContent=pct(conf)+'%';
-  document.getElementById('kpInfo').innerHTML=
-    `TARGETS: 1<br>POSE KP: ${vis}/33<br>HANDS: ${smoothHands.filter(h=>h.lms).length}<br>CONF: ${pct(conf)}%`;
+  $('cvConf').textContent=pct(conf)+'%'; $('cbConf').style.width=pct(conf)+'%';
+  $('cvKP').textContent=vis+'/33'; $('cbKP').style.width=(vis/33*100)+'%';
+  $('cvDet').textContent='LOCKED'; $('cvDet').style.color='var(--g)';
+  $('cbDet').style.cssText='width:100%;background:var(--g);box-shadow:0 0 4px var(--g);animation:none;';
+  $('mPersons').textContent=vis>5?'1':'0'; $('mConf').textContent=pct(conf)+'%';
+  $('kpInfo').innerHTML=`TARGETS: 1<br>POSE KP: ${vis}/33<br>HANDS: ${smoothHands.filter(h=>h.lms).length}<br>CONF: ${pct(conf)}%`;
 
+  const W=poseCanvas.width;
   const ls=lms[11],rs=lms[12];
-  if (ls&&rs&&(ls.visibility||0)>0.35&&(rs.visibility||0)>0.35) {
-    const W=poseCanvas.width;
+  if (ls&&rs&&(ls.visibility||0)>0.32) {
     const sw=Math.round(Math.sqrt(((ls.x-rs.x)*W)**2+((ls.y-rs.y)*poseCanvas.height)**2));
-    document.getElementById('vShoulderW').textContent=sw;
-    document.getElementById('vShoulderBar').style.width=clamp(sw/280*100,0,100)+'%';
+    $('vShW').textContent=sw; $('vShBar').style.width=clamp(sw/280*100,0,100)+'%';
   }
   const nose=lms[0], ankle=lms[27]||lms[28];
-  if (nose&&ankle) {
-    const bh=Math.round(Math.abs(nose.y-ankle.y)*poseCanvas.height);
-    document.getElementById('vBodyH').textContent=bh;
-    document.getElementById('vBodyBar').style.width=clamp(bh/480*100,0,100)+'%';
-  }
-  const ls2=lms[11],rs2=lms[12],lh=lms[23],rh=lms[24];
-  if (ls2&&rs2&&lh&&rh) {
-    const mx=(ls2.x+rs2.x)/2-(lh.x+rh.x)/2;
-    const my=(ls2.y+rs2.y)/2-(lh.y+rh.y)/2;
-    const ang=Math.round(Math.atan2(mx,-my)*180/PI);
-    document.getElementById('vTorso').textContent=ang+'°';
-    document.getElementById('vTorsoBar').style.width=clamp((ang+90)/180*100,0,100)+'%';
+  if (nose&&ankle) { const bh=Math.round(Math.abs(nose.y-ankle.y)*poseCanvas.height); $('vBH').textContent=bh; $('vBHBar').style.width=clamp(bh/480*100,0,100)+'%'; }
+  const ls2=lms[11],rs2=lms[12],lhp=lms[23],rhp=lms[24];
+  if (ls2&&rs2&&lhp&&rhp) {
+    const ang=Math.round(Math.atan2((ls2.x+rs2.x)/2-(lhp.x+rhp.x)/2,-((ls2.y+rs2.y)/2-(lhp.y+rhp.y)/2))*180/PI);
+    $('vTorso').textContent=ang+'°'; $('vTBar').style.width=clamp((ang+90)/180*100,0,100)+'%';
   }
 
   // Motion
   let motion=0;
-  if (prevLandmarks) {
+  if (prevPoseLms) {
     let tot=0,cnt=0;
-    [0,11,12,23,24,15,16].forEach(i=>{
-      const c=lms[i],p=prevLandmarks[i];
-      if (c&&p&&(c.visibility||0)>0.3) { tot+=Math.sqrt((c.x-p.x)**2+(c.y-p.y)**2); cnt++; }
-    });
-    motion=cnt>0?tot/cnt:0;
+    [0,11,12,23,24,15,16].forEach(i=>{ const c=lms[i],p=prevPoseLms[i]; if (c&&p&&(c.visibility||0)>0.28) { tot+=Math.sqrt((c.x-p.x)**2+(c.y-p.y)**2); cnt++; } });
+    motion=cnt?tot/cnt:0;
   }
-  motionMag=lerp(motionMag,motion*52,0.26);
+  motionMag=lerp(motionMag,motion*52,0.25);
   motionHistory.copyWithin(0,1); motionHistory[79]=clamp(motionMag,0,1);
-  prevLandmarks=lms;
+  prevPoseLms=lms;
+  $('vMot').textContent=motionMag<0.04?'IDLE':motionMag<0.12?'LOW':motionMag<0.28?'ACTIVE':'HIGH';
 
-  const mLabel=motionMag<0.04?'IDLE':motionMag<0.12?'LOW':motionMag<0.28?'ACTIVE':'HIGH';
-  document.getElementById('vMotion').textContent=mLabel;
+  // Person card
+  $('personList').innerHTML=`<div class="pcard"><div class="pavatar">A</div><div class="ni"><div class="pid">TARGET-ALPHA</div><div class="pstats">${vis}/33 KP · LOCKED</div></div><div class="pconf">${pct(conf)}%</div></div>`;
 
-  addToHeat(lms);
-  updatePersonCard(lms);
+  addHeat(lms);
+}
+
+function updateHandUI(hands) {
+  const ph=hands.find(h=>h.lms);
+  if (ph) {
+    const ext=fingerStates(ph.lms), g=gesture(ext);
+    ext.forEach((up,i)=>{ const el=$('f'+i); el.className='fc'+(up?' up':''); });
+    $('gestureName').textContent=g;
+    $('gestureConf').textContent=`${ph.label.toUpperCase()} · ${Math.round(ph.score*100)}%`;
+    $('mGest').textContent=ext.filter(Boolean).length;
+    const lh=hands.find(h=>h.label==='Left'), rh=hands.find(h=>h.label==='Right');
+    const p=v=>Math.round(v*100)+'%';
+    $('wLX').textContent=lh&&lh.lms?p(lh.lms[0].x):'—';
+    $('wLY').textContent=lh&&lh.lms?p(lh.lms[0].y):'—';
+    $('wRX').textContent=rh&&rh.lms?p(rh.lms[0].x):'—';
+    $('wRY').textContent=rh&&rh.lms?p(rh.lms[0].y):'—';
+  } else {
+    for(let i=0;i<5;i++) $('f'+i).className='fc';
+    $('gestureName').textContent='AWAITING'; $('gestureConf').textContent='NO HAND IN FRAME'; $('mGest').textContent='—';
+    ['wLX','wLY','wRX','wRY'].forEach(id=>$(id).textContent='—');
+  }
+  $('mHands').textContent=hands.filter(h=>h.lms).length;
 }
 
 // ── RENDER LOOP ───────────────────────────────────────────────────────────────
 function renderLoop() {
-  drawHeatmap(); drawMotionWave(); countFps();
-  const video=document.getElementById('videoEl');
-  const W=video.clientWidth||640, H=video.clientHeight||480;
-  if (poseCanvas.width!==W||poseCanvas.height!==H) {
-    poseCanvas.width=W; poseCanvas.height=H;
-  }
+  // Sync canvas size to actual video element size (cheap check)
+  const video=$('videoEl');
+  const W=video.clientWidth|0 || 640;
+  const H=video.clientHeight|0 || 480;
+  if (poseCanvas.width!==W||poseCanvas.height!==H) { poseCanvas.width=W; poseCanvas.height=H; }
+
   poseCtx.clearRect(0,0,W,H);
   if (smoothPose) { drawBBox(smoothPose,W,H); drawBody(smoothPose,W,H); }
   smoothHands.forEach(h=>{ if(h.lms) drawHand(h.lms,W,H,h.label); });
+
+  drawHeat();
+  drawWave();
+  countFps();
   requestAnimationFrame(renderLoop);
 }
 
-// ── MEDIAPIPE ─────────────────────────────────────────────────────────────────
+// ── MEDIAPIPE — INTERLEAVED ───────────────────────────────────────────────────
+// Key optimization: alternate Pose and Hands on even/odd frames so we never
+// run both heavy WASM modules in the same camera callback → halves per-frame compute.
 function startSensing() {
-  const video=document.getElementById('videoEl');
+  const video = $('videoEl');
 
-  const pose=new Pose({
-    locateFile: f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`
-  });
+  const pose = new Pose({ locateFile: f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}` });
   pose.setOptions({
-    modelComplexity:1, smoothLandmarks:true,
-    enableSegmentation:false, smoothSegmentation:false,
-    minDetectionConfidence:0.5, minTrackingConfidence:0.5,
+    modelComplexity: 0,           // ← 0 is much faster than 1, barely less accurate
+    smoothLandmarks: true,
+    enableSegmentation: false,
+    smoothSegmentation: false,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5,
   });
-  pose.onResults(results=>{
-    if (results.poseLandmarks&&results.poseLandmarks.length>0) {
-      smoothPose=poseSmoother.update(results.poseLandmarks);
-    } else {
-      smoothPose=poseSmoother.update(null);
-    }
-    updatePosePanel(smoothPose&&smoothPose.some(l=>l&&(l.visibility||0)>0.35)?smoothPose:null);
+  pose.onResults(r=>{
+    smoothPose = poseSmoother.update(r.poseLandmarks&&r.poseLandmarks.length ? r.poseLandmarks : null);
+    updatePoseUI(smoothPose);
   });
 
-  const hands=new Hands({
-    locateFile: f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`
-  });
+  const hands = new Hands({ locateFile: f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
   hands.setOptions({
-    maxNumHands:2, modelComplexity:1,
-    minDetectionConfidence:0.55, minTrackingConfidence:0.5,
+    maxNumHands: 2,
+    modelComplexity: 0,           // ← 0 for speed
+    minDetectionConfidence: 0.55,
+    minTrackingConfidence: 0.5,
   });
-  hands.onResults(results=>{
+  hands.onResults(r=>{
     smoothHands=[{lms:null,label:'Left',score:0},{lms:null,label:'Right',score:0}];
-    if (results.multiHandLandmarks&&results.multiHandLandmarks.length>0) {
-      results.multiHandLandmarks.forEach((lms,i)=>{
-        const cls=results.multiHandedness[i];
-        const label=cls?cls.label:'Right';
-        const score=cls?cls.score:1;
+    if (r.multiHandLandmarks&&r.multiHandLandmarks.length) {
+      r.multiHandLandmarks.forEach((lms,i)=>{
+        const cls=r.multiHandedness[i];
+        const label=cls?cls.label:'Right', score=cls?cls.score:1;
         const idx=label==='Left'?0:1;
-        smoothHands[idx]={lms:handSmoothers[idx].update(lms),label,score};
+        const sm=idx===0?handSmootherL:handSmootherR;
+        smoothHands[idx]={lms:sm.update(lms),label,score};
       });
     } else {
-      handSmoothers[0].reset(); handSmoothers[1].reset();
+      handSmootherL.reset(); handSmootherR.reset();
     }
-    updateHandPanel(smoothHands);
+    updateHandUI(smoothHands);
   });
 
-  const camera=new Camera(video,{
-    onFrame: async()=>{ await pose.send({image:video}); await hands.send({image:video}); },
-    width:640, height:480
+  // ── INTERLEAVED CAMERA CALLBACK ───────────────────────────────────────────
+  // Frame 0,2,4,… → Pose; Frame 1,3,5,… → Hands
+  // Means each model runs at ~15fps independently, but the loop stays at 30fps.
+  // Result: no frame where both models block simultaneously.
+  let frameCount = 0;
+  const camera = new Camera(video, {
+    onFrame: async () => {
+      if (frameCount % 2 === 0) {
+        await pose.send({image: video});
+      } else {
+        await hands.send({image: video});
+      }
+      frameCount++;
+    },
+    width: 640, height: 480
   });
 
   camera.start().then(()=>{
-    const s=document.getElementById('liveStatus');
+    const s=$('liveStatus');
     s.textContent='● LIVE'; s.style.color='var(--g)'; s.style.borderColor='var(--g)'; s.style.textShadow='0 0 8px var(--g)';
-    pushJarvis('CAMERA ONLINE · STREAMING 640×480');
+    pushJarvis('CAMERA ONLINE · INTERLEAVED PIPELINE ACTIVE');
     renderLoop();
   }).catch(err=>{
-    document.getElementById('errMsg').textContent='Camera error: '+err.message+'. Allow webcam and reload.';
-    document.getElementById('errBox').style.display='block';
+    $('errMsg').textContent='Camera error: '+err.message+'. Please allow webcam access and reload.';
+    $('errBox').style.display='block';
   });
 }
 
 // ── BOOT ──────────────────────────────────────────────────────────────────────
-let loadPct=0;
-const loadBar=document.getElementById('loadBar');
-const loadInterval=setInterval(()=>{
-  loadPct+=Math.random()*7+1;
-  if (loadPct>95) loadPct=95;
-  loadBar.style.width=loadPct+'%';
-},130);
+let lp=0;
+const lbar=$('loadBar');
+const lInterval=setInterval(()=>{ lp+=Math.random()*7+1; if(lp>95)lp=95; lbar.style.width=lp+'%'; },120);
 
-window.addEventListener('resize', resizeCanvases);
+window.addEventListener('resize', resizeAll, {passive:true});
 
-document.getElementById('startBtn').addEventListener('click',()=>{
-  clearInterval(loadInterval); loadBar.style.width='100%';
-  const splash=document.getElementById('splash');
-  splash.style.transition='opacity 0.7s ease'; splash.style.opacity='0';
-  setTimeout(()=>{ splash.style.display='none'; resizeCanvases(); startSensing(); }, 700);
+$('startBtn').addEventListener('click',()=>{
+  clearInterval(lInterval); lbar.style.width='100%';
+  const splash=$('splash');
+  splash.style.transition='opacity 0.65s'; splash.style.opacity='0';
+  setTimeout(()=>{ splash.style.display='none'; resizeAll(); startSensing(); }, 660);
 });
 
-setTimeout(resizeCanvases, 100);
+setTimeout(resizeAll,100);
 </script>
 </body>
 </html>
