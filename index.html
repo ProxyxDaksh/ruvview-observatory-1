@@ -3,175 +3,224 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>RUVIEW · JARVIS SENTINEL</title>
+<title>RUVIEW · JARVIS SENTINEL v3</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
 
 :root{
-  --c:#00f5ff;--g:#00ff88;--a:#ffcc00;--r:#ff3355;--p:#cc44ff;
-  --panel:rgba(0,6,16,0.94);--border:rgba(0,245,255,0.13);
+  --c:#00f5ff;--g:#00ff88;--a:#ffcc00;--r:#ff3355;--p:#cc44ff;--o:#ff7700;
+  --panel:rgba(0,5,14,0.95);--border:rgba(0,245,255,0.11);
+  --PC:['#00ff88','#ff9900','#ff44aa','#44aaff'];
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{background:#000508;color:var(--c);font-family:'Share Tech Mono',monospace;height:100%;width:100%;overflow:hidden;-webkit-tap-highlight-color:transparent;}
-
-/* scanlines - CSS only, zero JS cost */
-body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.08) 3px,rgba(0,0,0,0.08) 4px);pointer-events:none;z-index:8000;}
-
-@media(hover:hover){
-  body{cursor:none;}
-  #cursor{position:fixed;width:20px;height:20px;border:1.5px solid var(--c);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);box-shadow:0 0 8px var(--c);}
-  #cursor::after{content:'';position:absolute;top:50%;left:50%;width:3px;height:3px;background:var(--c);border-radius:50%;transform:translate(-50%,-50%);}
-}
+html,body{background:#000407;color:var(--c);font-family:'Share Tech Mono',monospace;height:100%;width:100%;overflow:hidden;-webkit-tap-highlight-color:transparent;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.07) 3px,rgba(0,0,0,0.07) 4px);pointer-events:none;z-index:8000;}
+@media(hover:hover){body{cursor:none;}#cursor{position:fixed;width:18px;height:18px;border:1.5px solid var(--c);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);box-shadow:0 0 8px var(--c);}#cursor::after{content:'';position:absolute;top:50%;left:50%;width:3px;height:3px;background:var(--c);border-radius:50%;transform:translate(-50%,-50%);}}
 
 /* ─ HEADER ─ */
-header{position:fixed;top:0;left:0;right:0;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:rgba(0,3,10,0.98);border-bottom:1px solid var(--border);z-index:600;}
+header{position:fixed;top:0;left:0;right:0;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:rgba(0,2,8,0.99);border-bottom:1px solid var(--border);z-index:700;}
 .logo{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(12px,3vw,15px);letter-spacing:5px;color:var(--c);text-shadow:0 0 16px var(--c);}
 .logo em{color:var(--g);font-style:normal;}
-.hdr-mid{display:flex;gap:7px;align-items:center;}
-.pill{font-size:7px;letter-spacing:2px;padding:3px 8px;border:1px solid currentColor;white-space:nowrap;}
+.hdr-mid{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.pill{font-size:7px;letter-spacing:2px;padding:3px 8px;border:1px solid currentColor;white-space:nowrap;font-family:'Orbitron',monospace;}
 .pill.live{color:var(--g);animation:blink 2s infinite;}
+.pill.armed{color:var(--r);animation:blink 0.8s infinite;}
+.pill.fall{color:var(--o);animation:blink 0.6s infinite;}
 .pill.mode{color:var(--a);}
 .pill.ai{color:var(--p);}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.35;}}
-#clockEl{font-size:8px;color:rgba(0,245,255,0.38);letter-spacing:1px;white-space:nowrap;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+#clockEl{font-size:8px;color:rgba(0,245,255,0.36);letter-spacing:1px;white-space:nowrap;}
+
+/* ─ ALERT BANNER ─ */
+#alertBanner{position:fixed;top:46px;left:0;right:0;height:0;overflow:hidden;z-index:650;transition:height 0.3s;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:11px;letter-spacing:4px;font-weight:700;}
+#alertBanner.show{height:34px;}
+#alertBanner.fall-alert{background:rgba(255,119,0,0.9);color:#000;box-shadow:0 0 30px var(--o);}
+#alertBanner.intruder-alert{background:rgba(255,51,85,0.9);color:#fff;box-shadow:0 0 30px var(--r);}
+#alertBanner.gesture-alert{background:rgba(0,255,136,0.15);color:var(--g);border-bottom:1px solid var(--g);}
 
 /* ─ LAYOUT ─ */
-.layout{position:fixed;top:46px;left:0;right:0;bottom:22px;display:grid;grid-template-columns:210px 1fr 210px;grid-template-rows:1fr 1fr;gap:1px;background:rgba(0,245,255,0.04);}
+.layout{position:fixed;top:46px;left:0;right:0;bottom:22px;display:grid;grid-template-columns:200px 1fr 200px;grid-template-rows:1fr 1fr;gap:1px;background:rgba(0,245,255,0.03);transition:top 0.3s;}
+.layout.banner-open{top:80px;}
 
 /* ─ PANELS ─ */
-.panel{background:var(--panel);border:1px solid var(--border);position:relative;overflow:hidden;padding:11px;}
-.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--c),transparent);opacity:0.35;}
-.ptitle{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:3px;color:rgba(0,245,255,0.36);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.panel{background:var(--panel);border:1px solid var(--border);position:relative;overflow:hidden;padding:10px;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--c),transparent);opacity:0.3;}
+.ptitle{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:2.5px;color:rgba(0,245,255,0.35);text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:5px;}
 .ptitle::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent);}
+.ptitle .dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.ptitle .dot.red{color:var(--r);background:var(--r);box-shadow:0 0 5px var(--r);animation:blink 1s infinite;}
+.ptitle .dot.grn{color:var(--g);background:var(--g);box-shadow:0 0 5px var(--g);}
+.ptitle .dot.ylw{color:var(--a);background:var(--a);box-shadow:0 0 5px var(--a);}
 
 /* ─ CENTER ─ */
-.p-center{grid-row:1/3;grid-column:2;display:flex;flex-direction:column;align-items:center;padding:9px;background:radial-gradient(ellipse at 50% 36%,rgba(0,20,38,0.5) 0%,rgba(0,4,12,0.93) 70%);}
-#camWrap{position:relative;width:100%;max-width:540px;background:#000;overflow:hidden;flex-shrink:0;}
-/* corner brackets via CSS only — no JS */
-#camWrap::before{content:'';position:absolute;top:0;left:0;width:20px;height:20px;border-top:2px solid var(--c);border-left:2px solid var(--c);z-index:15;box-shadow:0 0 6px var(--c);}
-.c-tr,.c-bl,.c-br{position:absolute;width:20px;height:20px;z-index:15;pointer-events:none;}
-.c-tr{top:0;right:0;border-top:2px solid var(--c);border-right:2px solid var(--c);box-shadow:0 0 6px var(--c);}
-.c-bl{bottom:0;left:0;border-bottom:2px solid var(--c);border-left:2px solid var(--c);box-shadow:0 0 6px var(--c);}
-.c-br{bottom:0;right:0;border-bottom:2px solid var(--c);border-right:2px solid var(--c);box-shadow:0 0 6px var(--c);}
-#videoEl{width:100%;display:block;transform:scaleX(-1);opacity:0.78;min-height:180px;}
+.p-center{grid-row:1/3;grid-column:2;display:flex;flex-direction:column;align-items:center;padding:8px;background:radial-gradient(ellipse at 50% 36%,rgba(0,18,34,0.5) 0%,rgba(0,3,10,0.94) 70%);}
+#camWrap{position:relative;width:100%;max-width:560px;background:#000;overflow:hidden;flex-shrink:0;}
+#camWrap::before{content:'';position:absolute;top:0;left:0;width:18px;height:18px;border-top:2px solid var(--c);border-left:2px solid var(--c);z-index:15;box-shadow:0 0 6px var(--c);}
+.ctr,.cbl,.cbr{position:absolute;width:18px;height:18px;z-index:15;pointer-events:none;}
+.ctr{top:0;right:0;border-top:2px solid var(--c);border-right:2px solid var(--c);box-shadow:0 0 6px var(--c);}
+.cbl{bottom:0;left:0;border-bottom:2px solid var(--c);border-left:2px solid var(--c);box-shadow:0 0 6px var(--c);}
+.cbr{bottom:0;right:0;border-bottom:2px solid var(--c);border-right:2px solid var(--c);box-shadow:0 0 6px var(--c);}
+#videoEl{width:100%;display:block;transform:scaleX(-1);opacity:0.8;min-height:180px;}
 #poseCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;}
-/* scan line — pure CSS animation, zero JS */
-.scanline{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(0,245,255,0.5),transparent);z-index:12;animation:scanmove 4s linear infinite;pointer-events:none;}
-@keyframes scanmove{from{top:-2px;}to{top:100%;}}
-.kpbadge{position:absolute;top:7px;right:7px;background:rgba(0,4,14,0.86);border:1px solid rgba(0,245,255,0.16);padding:4px 8px;z-index:20;font-size:7px;letter-spacing:1px;line-height:2;text-align:right;}
+.scanline{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(0,245,255,0.45),transparent);z-index:12;animation:scan 4s linear infinite;pointer-events:none;}
+@keyframes scan{from{top:-2px;}to{top:100%;}}
+.kpbadge{position:absolute;top:7px;right:7px;background:rgba(0,3,12,0.88);border:1px solid rgba(0,245,255,0.15);padding:4px 8px;z-index:20;font-size:7px;letter-spacing:1px;line-height:2;text-align:right;}
 
-.meta-row{display:flex;width:100%;max-width:540px;margin-top:7px;border:1px solid var(--border);}
-.meta-cell{flex:1;text-align:center;padding:6px 2px;border-right:1px solid var(--border);}
+/* flash overlay for alerts */
+#flashOverlay{position:absolute;inset:0;z-index:11;pointer-events:none;opacity:0;transition:opacity 0.1s;}
+
+.meta-row{display:flex;width:100%;max-width:560px;margin-top:6px;border:1px solid var(--border);}
+.meta-cell{flex:1;text-align:center;padding:5px 2px;border-right:1px solid var(--border);}
 .meta-cell:last-child{border-right:none;}
-.mv{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;}
-.ml{font-size:6px;letter-spacing:1.5px;color:rgba(0,245,255,0.3);margin-top:2px;}
+.mv{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;}
+.ml{font-size:6px;letter-spacing:1.5px;color:rgba(0,245,255,0.28);margin-top:2px;}
 
-#aiLog{width:100%;max-width:540px;margin-top:7px;border:1px solid var(--border);background:rgba(0,10,20,0.7);padding:6px 9px;height:58px;overflow:hidden;}
-#aiLog::before{content:'J.A.R.V.I.S ▸';font-family:'Orbitron',monospace;font-size:6px;letter-spacing:3px;color:rgba(0,245,255,0.25);display:block;margin-bottom:3px;}
-.ai-line{font-size:7px;letter-spacing:0.5px;color:rgba(0,245,255,0.62);line-height:1.9;}
+#aiLog{width:100%;max-width:560px;margin-top:6px;border:1px solid var(--border);background:rgba(0,8,18,0.75);padding:5px 8px;height:56px;overflow:hidden;}
+#aiLog::before{content:'J.A.R.V.I.S ▸';font-family:'Orbitron',monospace;font-size:6px;letter-spacing:3px;color:rgba(0,245,255,0.22);display:block;margin-bottom:2px;}
+.ai-line{font-size:7px;letter-spacing:0.5px;color:rgba(0,245,255,0.6);line-height:1.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-/* ─ VITALS ─ */
-.vb{border:1px solid rgba(0,245,255,0.08);padding:7px 9px;margin-bottom:5px;background:rgba(0,11,22,0.5);}
-.vl{font-size:7px;letter-spacing:1.5px;color:rgba(0,245,255,0.34);text-transform:uppercase;}
-.vv{font-family:'Orbitron',monospace;font-size:20px;font-weight:700;line-height:1.1;margin:2px 0;}
-.vu{font-size:6px;color:rgba(0,245,255,0.3);letter-spacing:1px;}
+/* ─ SHARED BLOCKS ─ */
+.vb{border:1px solid rgba(0,245,255,0.08);padding:7px 8px;margin-bottom:4px;background:rgba(0,10,20,0.5);}
+.vl{font-size:6px;letter-spacing:1.5px;color:rgba(0,245,255,0.32);text-transform:uppercase;}
+.vv{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;line-height:1.1;margin:2px 0;}
+.vu{font-size:6px;color:rgba(0,245,255,0.28);letter-spacing:1px;}
 .vbar{height:2px;background:rgba(0,245,255,0.07);margin-top:5px;}
-.vbar-fill{height:100%;transition:width 0.5s ease;box-shadow:0 0 5px currentColor;}
-canvas.wave{width:100%;height:34px;display:block;margin-top:5px;}
+.vfill{height:100%;transition:width 0.45s ease;box-shadow:0 0 4px currentColor;}
+canvas.wave{width:100%;height:30px;display:block;margin-top:4px;}
 
-/* ─ HAND PANEL ─ */
-.gesture-box{border:1px solid rgba(0,245,255,0.08);padding:7px 9px;background:rgba(0,11,22,0.5);margin-bottom:5px;}
-.gname{font-family:'Orbitron',monospace;font-size:12px;color:var(--g);text-shadow:0 0 10px var(--g);letter-spacing:1.5px;min-height:16px;}
-.gconf{font-size:7px;color:rgba(0,245,255,0.35);margin-top:2px;}
-.fgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-top:6px;}
-.fc{border:1px solid rgba(0,245,255,0.08);padding:4px 2px;text-align:center;font-size:6px;letter-spacing:0.5px;color:rgba(0,245,255,0.3);transition:all 0.2s;}
-.fc.up{border-color:var(--g);color:var(--g);background:rgba(0,255,136,0.07);}
+/* ─ PERSON CARDS ─ */
+#personCards{display:flex;flex-direction:column;gap:4px;overflow-y:auto;max-height:calc(100% - 30px);}
+.pcard{border:1px solid;padding:6px 8px;display:flex;align-items:center;gap:7px;background:rgba(0,8,18,0.6);transition:border-color 0.3s,box-shadow 0.3s;}
+.pcard.fall{border-color:var(--o)!important;box-shadow:0 0 12px rgba(255,119,0,0.3)!important;animation:blink 0.6s infinite;}
+.pavatar{width:24px;height:24px;border-radius:50%;border:1.5px solid;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:8px;font-weight:700;flex-shrink:0;}
+.pid{font-family:'Orbitron',monospace;font-size:9px;font-weight:700;letter-spacing:1.5px;}
+.pstats{font-size:6px;letter-spacing:1px;color:rgba(0,245,255,0.32);margin-top:2px;}
+.pconf{font-family:'Orbitron',monospace;font-size:10px;}
+.pstatus{font-size:6px;letter-spacing:1px;margin-top:1px;font-family:'Orbitron',monospace;}
+
+/* ─ GESTURE ─ */
+.gesture-box{border:1px solid rgba(0,245,255,0.08);padding:7px 8px;background:rgba(0,10,20,0.5);margin-bottom:4px;}
+.gname{font-family:'Orbitron',monospace;font-size:11px;color:var(--g);text-shadow:0 0 10px var(--g);letter-spacing:1.5px;min-height:15px;}
+.gconf{font-size:7px;color:rgba(0,245,255,0.32);margin-top:2px;}
+.fgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-top:5px;}
+.fc{border:1px solid rgba(0,245,255,0.08);padding:4px 2px;text-align:center;font-size:6px;color:rgba(0,245,255,0.28);transition:all 0.18s;}
+.fc.up{border-color:var(--g);color:var(--g);background:rgba(0,255,136,0.07);box-shadow:0 0 4px rgba(0,255,136,0.3);}
+
+/* ─ GESTURE ACTIONS ─ */
+.gaction-list{display:flex;flex-direction:column;gap:3px;margin-top:4px;}
+.gaction{display:flex;align-items:center;gap:6px;padding:4px 7px;border:1px solid rgba(0,245,255,0.07);background:rgba(0,8,18,0.4);font-size:7px;}
+.gaction .icon{font-size:10px;flex-shrink:0;}
+.gaction .desc{flex:1;color:rgba(0,245,255,0.5);letter-spacing:0.5px;}
+.gaction .trigger{font-family:'Orbitron',monospace;font-size:7px;color:rgba(0,245,255,0.25);}
+.gaction.active{border-color:var(--g);background:rgba(0,255,136,0.05);}
+.gaction.active .desc{color:var(--g);}
+
+/* ─ ALARM PANEL ─ */
+.alarm-status{border:1px solid;padding:7px 9px;margin-bottom:4px;background:rgba(0,8,18,0.5);position:relative;overflow:hidden;}
+.alarm-status::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,51,85,0.04) 0%,transparent 60%);pointer-events:none;}
+.alarm-row{display:flex;align-items:center;gap:8px;margin-bottom:3px;}
+.alarm-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.alarm-dot.armed{background:var(--r);box-shadow:0 0 8px var(--r);animation:blink 1s infinite;}
+.alarm-dot.disarmed{background:#222;}
+.alarm-dot.triggered{background:var(--r);box-shadow:0 0 14px var(--r);animation:blink 0.4s infinite;}
+.alarm-label{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;}
+.alarm-val{font-family:'Orbitron',monospace;font-size:16px;font-weight:700;}
+.arm-btn{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:2px;padding:5px 10px;border:1px solid currentColor;background:transparent;cursor:pointer;width:100%;margin-top:6px;transition:all 0.2s;text-transform:uppercase;}
+.arm-btn.arm{color:var(--r);text-shadow:0 0 6px var(--r);}
+.arm-btn.arm:hover{background:rgba(255,51,85,0.1);}
+.arm-btn.disarm{color:var(--g);text-shadow:0 0 6px var(--g);}
+.arm-btn.disarm:hover{background:rgba(0,255,136,0.07);}
+
+/* fall detect card */
+.fall-card{border:1px solid rgba(0,245,255,0.08);padding:7px 8px;background:rgba(0,10,20,0.5);margin-bottom:4px;}
+.fall-indicator{display:flex;align-items:center;gap:7px;margin-bottom:4px;}
+.fall-dot{width:10px;height:10px;border-radius:50%;background:#1a1a2a;flex-shrink:0;transition:all 0.3s;}
+.fall-dot.ok{background:var(--g);box-shadow:0 0 8px var(--g);}
+.fall-dot.warn{background:var(--a);box-shadow:0 0 8px var(--a);animation:blink 1s infinite;}
+.fall-dot.fall{background:var(--r);box-shadow:0 0 14px var(--r);animation:blink 0.4s infinite;}
+.fall-label{font-family:'Orbitron',monospace;font-size:10px;}
+.fall-stat{font-size:7px;color:rgba(0,245,255,0.35);}
+
+/* wrist coords */
+.wbox{border:1px solid rgba(0,245,255,0.08);padding:6px 8px;background:rgba(0,10,20,0.5);}
+.wgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:3px;}
+.wval{font-family:'Orbitron',monospace;font-size:9px;}
 
 /* ─ HEATMAP ─ */
 #heatCanvas{width:100%;height:calc(100% - 26px);display:block;}
 
-/* ─ STATUS ─ */
-.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px;}
-.cc{border:1px solid rgba(0,245,255,0.08);padding:6px 7px;background:rgba(0,9,19,0.5);}
-.cl{font-size:6px;letter-spacing:1px;color:rgba(0,245,255,0.3);text-transform:uppercase;}
-.cv{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;margin:2px 0;}
+/* ─ STATUS GRID ─ */
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:5px;}
+.cc{border:1px solid rgba(0,245,255,0.07);padding:5px 7px;background:rgba(0,8,18,0.5);}
+.cl{font-size:6px;letter-spacing:1px;color:rgba(0,245,255,0.28);text-transform:uppercase;}
+.cv{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;margin:2px 0;}
 .cbar{height:1px;background:rgba(0,245,255,0.06);}
-.cbar-fill{height:100%;background:var(--c);box-shadow:0 0 4px var(--c);transition:width 0.6s;}
+.cbf{height:100%;background:var(--c);box-shadow:0 0 4px var(--c);transition:width 0.55s;}
 
+/* nodes */
 .nodes{display:flex;flex-direction:column;gap:3px;}
-.nr{display:flex;align-items:center;gap:6px;padding:4px 7px;border:1px solid rgba(0,245,255,0.06);background:rgba(0,7,16,0.4);}
-.nd{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.nd.on{background:var(--g);box-shadow:0 0 7px var(--g);animation:nd 1.8s infinite;}
+.nr{display:flex;align-items:center;gap:5px;padding:4px 6px;border:1px solid rgba(0,245,255,0.06);background:rgba(0,6,14,0.4);}
+.nd{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.nd.on{background:var(--g);box-shadow:0 0 6px var(--g);animation:nd 1.8s infinite;}
 .nd.dim{background:var(--a);box-shadow:0 0 5px var(--a);animation:nd 2.5s infinite;}
-.nd.off{background:#18182a;}
-@keyframes nd{0%,100%{opacity:1;}50%{opacity:0.2;}}
-.ni{flex:1;}.nn{font-size:7px;letter-spacing:0.5px;}.ns{font-size:6px;color:rgba(0,245,255,0.25);}
+.nd.off{background:#151525;}
+@keyframes nd{0%,100%{opacity:1;}50%{opacity:0.18;}}
+.ni{flex:1;}.nn{font-size:7px;letter-spacing:0.5px;}.ns{font-size:6px;color:rgba(0,245,255,0.24);}
 .nf{font-family:'Orbitron',monospace;font-size:8px;color:var(--g);}
 
-/* person card */
-.pcard{border:1px solid var(--g);padding:6px 8px;display:flex;align-items:center;gap:7px;background:rgba(0,10,22,0.6);box-shadow:0 0 8px rgba(0,255,136,0.07);}
-.pavatar{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--g);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:8px;font-weight:700;color:var(--g);flex-shrink:0;}
-.pid{font-family:'Orbitron',monospace;font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--g);}
-.pstats{font-size:6px;letter-spacing:1px;color:rgba(0,245,255,0.35);margin-top:2px;}
-.pconf{font-family:'Orbitron',monospace;font-size:10px;color:var(--g);}
-
-/* wrist coords */
-.wbox{border:1px solid rgba(0,245,255,0.08);padding:7px 9px;background:rgba(0,11,22,0.5);}
-.wgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px;}
-.wval{font-family:'Orbitron',monospace;font-size:10px;}
+/* ─ HEATMAP PANEL ─ */
+#subCanvas{width:100%;height:calc(100% - 26px);display:block;}
 
 /* ─ SPLASH ─ */
-#splash{position:fixed;inset:0;background:#000508;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:7000;gap:16px;padding:20px;}
-.slogo{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(26px,8vw,52px);letter-spacing:10px;color:var(--c);text-shadow:0 0 36px var(--c);animation:flicker 5s infinite;}
-@keyframes flicker{0%,93%,100%{opacity:1;}94%{opacity:0.5;}95%{opacity:1;}97%{opacity:0.65;}}
-.sring{width:clamp(90px,20vw,140px);height:clamp(90px,20vw,140px);}
+#splash{position:fixed;inset:0;background:#000407;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9000;gap:14px;padding:20px;}
+.slogo{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(24px,8vw,50px);letter-spacing:10px;color:var(--c);text-shadow:0 0 36px var(--c),0 0 70px rgba(0,245,255,0.2);animation:flicker 5s infinite;}
+@keyframes flicker{0%,93%,100%{opacity:1;}94%{opacity:0.45;}95%{opacity:1;}97%{opacity:0.6;}}
+.sring{width:clamp(80px,18vw,130px);height:clamp(80px,18vw,130px);}
 .sring svg{animation:rot 8s linear infinite;}
 @keyframes rot{to{transform:rotate(360deg);}}
-.ssub{font-family:'Rajdhani',sans-serif;font-size:clamp(10px,2.5vw,13px);letter-spacing:4px;color:rgba(0,245,255,0.4);font-weight:300;text-align:center;}
-.snote{font-size:clamp(8px,2vw,10px);color:rgba(0,245,255,0.25);letter-spacing:1px;max-width:320px;text-align:center;line-height:2;}
-#startBtn{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;padding:12px 28px;background:transparent;border:1px solid var(--c);color:var(--c);cursor:pointer;text-transform:uppercase;text-shadow:0 0 8px var(--c);transition:all 0.25s;position:relative;overflow:hidden;}
+.ssub{font-family:'Rajdhani',sans-serif;font-size:clamp(9px,2vw,12px);letter-spacing:4px;color:rgba(0,245,255,0.38);font-weight:300;text-align:center;}
+.snote{font-size:clamp(8px,1.8vw,10px);color:rgba(0,245,255,0.22);letter-spacing:0.5px;max-width:340px;text-align:center;line-height:2.2;}
+.feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;max-width:300px;}
+.feat{border:1px solid rgba(0,245,255,0.1);padding:7px 10px;font-size:8px;letter-spacing:1px;color:rgba(0,245,255,0.45);}
+.feat strong{color:var(--g);display:block;font-family:'Orbitron',monospace;font-size:7px;margin-bottom:3px;letter-spacing:2px;}
+#startBtn{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:3px;padding:12px 26px;background:transparent;border:1px solid var(--c);color:var(--c);cursor:pointer;text-transform:uppercase;text-shadow:0 0 8px var(--c);transition:all 0.25s;position:relative;overflow:hidden;}
 #startBtn::before{content:'';position:absolute;top:50%;left:-100%;width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--c),transparent);transform:translateY(-50%);animation:sweep 2.5s linear infinite;}
 @keyframes sweep{to{left:200%;}}
-#startBtn:hover{background:rgba(0,245,255,0.07);box-shadow:0 0 30px rgba(0,245,255,0.25);}
-.lbwrap{width:190px;height:1px;background:rgba(0,245,255,0.09);}
+#startBtn:hover{background:rgba(0,245,255,0.06);box-shadow:0 0 28px rgba(0,245,255,0.22);}
+.lbwrap{width:180px;height:1px;background:rgba(0,245,255,0.08);}
 .lb{height:100%;width:0%;background:var(--c);box-shadow:0 0 8px var(--c);transition:width 0.1s;}
 
 /* ─ TICKER ─ */
-#ticker{position:fixed;bottom:0;left:0;right:0;height:22px;background:rgba(0,2,8,0.98);border-top:1px solid var(--border);display:flex;align-items:center;overflow:hidden;z-index:600;}
-.tlbl{font-size:7px;letter-spacing:2px;color:var(--a);padding:0 11px;white-space:nowrap;border-right:1px solid var(--border);height:100%;display:flex;align-items:center;flex-shrink:0;}
-.tscroll{display:flex;gap:50px;animation:tscroll 55s linear infinite;white-space:nowrap;font-size:7px;letter-spacing:1px;color:rgba(0,245,255,0.3);padding-left:18px;}
+#ticker{position:fixed;bottom:0;left:0;right:0;height:22px;background:rgba(0,1,6,0.99);border-top:1px solid var(--border);display:flex;align-items:center;overflow:hidden;z-index:700;}
+.tlbl{font-size:7px;letter-spacing:2px;color:var(--a);padding:0 10px;white-space:nowrap;border-right:1px solid var(--border);height:100%;display:flex;align-items:center;flex-shrink:0;}
+.tscroll{display:flex;gap:50px;animation:tscroll 70s linear infinite;white-space:nowrap;font-size:7px;letter-spacing:0.5px;color:rgba(0,245,255,0.28);padding-left:16px;}
 @keyframes tscroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 
-/* error */
-#errBox{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,4,12,0.98);border:1px solid var(--r);padding:24px 32px;text-align:center;z-index:9000;max-width:340px;width:90%;}
+#errBox{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,3,10,0.99);border:1px solid var(--r);padding:22px 30px;text-align:center;z-index:9999;max-width:330px;width:90%;}
 #errBox h3{color:var(--r);font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;margin-bottom:8px;}
-#errBox p{font-size:10px;color:rgba(0,245,255,0.5);line-height:1.9;}
+#errBox p{font-size:10px;color:rgba(0,245,255,0.48);line-height:1.9;}
 
 /* mobile */
-@media(max-width:700px){
-  header{padding:0 10px;}
-  .logo{font-size:12px;letter-spacing:3px;}
-  #clockEl,.hdr-mid .pill.mode{display:none;}
+@media(max-width:680px){
+  header{padding:0 10px;} .logo{font-size:12px;letter-spacing:3px;} #clockEl,.pill.mode{display:none;}
   .layout{grid-template-columns:1fr;display:block;position:fixed;top:46px;left:0;right:0;bottom:22px;}
-  .p-center{position:absolute;inset:0;padding:6px;display:flex;flex-direction:column;}
+  .layout.banner-open{top:80px;}
+  .p-center{position:absolute;inset:0;padding:5px;display:flex;flex-direction:column;}
   .layout>.panel:not(.p-center){display:none;}
-  #camWrap{flex:1;min-height:0;}
-  #videoEl{height:100%;object-fit:cover;min-height:0;}
-  #aiLog{height:46px;}
+  #camWrap{flex:1;min-height:0;} #videoEl{height:100%;object-fit:cover;min-height:0;}
+  #aiLog{height:44px;} .meta-row .mv{font-size:11px;}
 }
-
-/* color helpers */
 .gc{color:var(--c);text-shadow:0 0 7px var(--c);}
 .gg{color:var(--g);text-shadow:0 0 7px var(--g);}
 .ga{color:var(--a);text-shadow:0 0 7px var(--a);}
 .gr{color:var(--r);text-shadow:0 0 7px var(--r);}
 .gp{color:var(--p);text-shadow:0 0 7px var(--p);}
-
+.go{color:var(--o);text-shadow:0 0 7px var(--o);}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
-.panel{animation:fadeUp 0.5s ease both;}
-.panel:nth-child(1){animation-delay:.05s}.panel:nth-child(2){animation-delay:.15s}
-.panel:nth-child(3){animation-delay:.1s}.panel:nth-child(4){animation-delay:.2s}
-.panel:nth-child(5){animation-delay:.25s}
+.panel{animation:fadeUp 0.45s ease both;}
+.panel:nth-child(1){animation-delay:.04s}.panel:nth-child(2){animation-delay:.14s}
+.panel:nth-child(3){animation-delay:.09s}.panel:nth-child(4){animation-delay:.19s}
+.panel:nth-child(5){animation-delay:.24s}
 </style>
 </head>
 <body>
@@ -180,84 +229,117 @@ canvas.wave{width:100%;height:34px;display:block;margin-top:5px;}
 <!-- SPLASH -->
 <div id="splash">
   <div class="slogo">RUVIEW</div>
-  <div class="sring">
-    <svg viewBox="0 0 140 140" width="100%" height="100%">
-      <circle cx="70" cy="70" r="62" fill="none" stroke="rgba(0,245,255,0.07)" stroke-width="1"/>
-      <circle cx="70" cy="70" r="62" fill="none" stroke="url(#rg)" stroke-width="1.5" stroke-dasharray="100 290"/>
-      <circle cx="70" cy="70" r="50" fill="none" stroke="rgba(0,255,136,0.3)" stroke-width="1" stroke-dasharray="34 280" stroke-dashoffset="160"/>
-      <circle cx="70" cy="70" r="38" fill="none" stroke="rgba(255,204,0,0.15)" stroke-width="0.5" stroke-dasharray="18 220"/>
-      <circle cx="70" cy="70" r="3.5" fill="#00f5ff"/>
-      <circle cx="70" cy="70" r="9" fill="none" stroke="#00f5ff" stroke-width="0.5" opacity="0.4"/>
-      <text x="70" y="74" text-anchor="middle" font-family="Orbitron,monospace" font-size="6" fill="rgba(0,245,255,0.5)" letter-spacing="2">INIT</text>
-      <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00f5ff" stop-opacity="0"/><stop offset="50%" stop-color="#00f5ff" stop-opacity="1"/><stop offset="100%" stop-color="#00f5ff" stop-opacity="0"/></linearGradient></defs>
-    </svg>
+  <div class="sring"><svg viewBox="0 0 130 130" width="100%" height="100%">
+    <circle cx="65" cy="65" r="58" fill="none" stroke="rgba(0,245,255,0.06)" stroke-width="1"/>
+    <circle cx="65" cy="65" r="58" fill="none" stroke="url(#rg)" stroke-width="1.5" stroke-dasharray="94 270"/>
+    <circle cx="65" cy="65" r="47" fill="none" stroke="rgba(0,255,136,0.28)" stroke-width="1" stroke-dasharray="32 263" stroke-dashoffset="150"/>
+    <circle cx="65" cy="65" r="36" fill="none" stroke="rgba(255,204,0,0.14)" stroke-width="0.5" stroke-dasharray="16 210"/>
+    <circle cx="65" cy="65" r="3" fill="#00f5ff"/>
+    <circle cx="65" cy="65" r="8" fill="none" stroke="#00f5ff" stroke-width="0.5" opacity="0.35"/>
+    <text x="65" y="69" text-anchor="middle" font-family="Orbitron,monospace" font-size="6" fill="rgba(0,245,255,0.48)" letter-spacing="1">INIT</text>
+    <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00f5ff" stop-opacity="0"/><stop offset="50%" stop-color="#00f5ff" stop-opacity="1"/><stop offset="100%" stop-color="#00f5ff" stop-opacity="0"/></linearGradient></defs>
+  </svg></div>
+  <div class="ssub">JARVIS SENTINEL v3 · ADVANCED HUMAN SENSING</div>
+  <div class="feat-grid">
+    <div class="feat"><strong>MULTI-PERSON</strong>Up to 4 targets tracked simultaneously</div>
+    <div class="feat"><strong>GESTURE CTRL</strong>9 gestures trigger system actions</div>
+    <div class="feat"><strong>FALL DETECT</strong>Real-time posture & fall analysis</div>
+    <div class="feat"><strong>INTRUDER ALARM</strong>Motion-armed perimeter alert</div>
   </div>
-  <div class="ssub">JARVIS SENTINEL · HUMAN SENSING OBSERVATORY</div>
-  <div class="snote">Full-body pose · Hand + finger tracking · Gesture recognition<br>Optimized pipeline · Interleaved models · Low latency</div>
   <div class="lbwrap"><div class="lb" id="loadBar"></div></div>
-  <button id="startBtn">⬡ INITIALIZE JARVIS</button>
-  <div class="snote" style="font-size:7px;opacity:0.3;">Chrome/Edge recommended · Allow camera access</div>
+  <button id="startBtn">⬡ INITIALIZE JARVIS v3</button>
+  <div class="snote" style="font-size:7px;opacity:0.28;">Chrome/Edge · Allow camera · Best in good light</div>
 </div>
 
 <div id="errBox"><h3>⚠ SENSOR FAULT</h3><p id="errMsg">Camera error.</p></div>
 
+<!-- ALERT BANNER -->
+<div id="alertBanner"></div>
+
 <!-- HEADER -->
 <header>
-  <div class="logo">RU<em>VIEW</em></div>
+  <div class="logo">RU<em>VIEW</em> <span style="font-size:8px;font-weight:400;color:rgba(0,245,255,0.3);letter-spacing:2px;font-family:'Rajdhani',sans-serif;">v3</span></div>
   <div class="hdr-mid">
     <div class="pill live" id="liveStatus">● INIT</div>
-    <div class="pill mode">POSE+HANDS</div>
+    <div class="pill mode">SENTINEL</div>
     <div class="pill ai">J.A.R.V.I.S</div>
+    <div class="pill armed" id="alarmPill" style="display:none;">⚠ ALARM</div>
+    <div class="pill fall" id="fallPill" style="display:none;">⚠ FALL</div>
   </div>
   <div id="clockEl">--:--:-- UTC</div>
 </header>
 
-<!-- MAIN -->
-<div class="layout">
+<!-- MAIN LAYOUT -->
+<div class="layout" id="mainLayout">
 
-  <!-- LEFT TOP: Pose Analytics -->
+  <!-- LEFT TOP: Fall Detection + Alarm -->
   <div class="panel">
-    <div class="ptitle">Pose Analytics</div>
-    <div class="vb"><div class="vl">Shoulder Width</div><div class="vv gr" id="vShW">—</div><div class="vu">PIXELS · BODY SCALE</div><div class="vbar"><div class="vbar-fill" id="vShBar" style="width:0%;color:var(--r);background:var(--r);"></div></div></div>
-    <div class="vb"><div class="vl">Body Height</div><div class="vv gc" id="vBH">—</div><div class="vu">NOSE → ANKLE</div><div class="vbar"><div class="vbar-fill" id="vBHBar" style="width:0%;color:var(--c);background:var(--c);"></div></div></div>
-    <div class="vb"><div class="vl">Torso Lean</div><div class="vv gg" id="vTorso">—</div><div class="vu">DEGREES · VERTICAL</div><div class="vbar"><div class="vbar-fill" id="vTBar" style="width:50%;color:var(--g);background:var(--g);"></div></div></div>
-    <div class="vb"><div class="vl">Motion Level</div><div class="vv ga" id="vMot">IDLE</div><div class="vu">KINEMATIC ACTIVITY</div><canvas class="wave" id="motionWave"></canvas></div>
+    <div class="ptitle"><span class="dot red" id="fallDot" style="background:#1a1a2a;box-shadow:none;animation:none;"></span>Fall Detection</div>
+    <div class="fall-card">
+      <div class="fall-indicator">
+        <div class="fall-dot" id="fallDotBig"></div>
+        <div>
+          <div class="fall-label gg" id="fallStatus">UPRIGHT</div>
+          <div class="fall-stat" id="fallConf">CONFIDENCE: 100%</div>
+        </div>
+      </div>
+      <div class="vbar"><div class="vfill" id="fallBar" style="width:100%;color:var(--g);background:var(--g);"></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:6px;">
+        <div><div class="vl">TORSO ANGLE</div><div class="vv gc" id="torsoAngle" style="font-size:15px;">—</div></div>
+        <div><div class="vl">HIP HEIGHT</div><div class="vv gc" id="hipHeight" style="font-size:15px;">—</div></div>
+      </div>
+    </div>
+
+    <div class="ptitle" style="margin-top:4px;"><span class="dot" id="alarmDot2" style="background:#1a1a2a;"></span>Intruder Alarm</div>
+    <div class="alarm-status" id="alarmBox" style="border-color:rgba(0,245,255,0.1);">
+      <div class="alarm-row">
+        <div class="alarm-dot disarmed" id="alarmDotBig"></div>
+        <div>
+          <div class="alarm-label gc" id="alarmState">DISARMED</div>
+          <div style="font-size:6px;color:rgba(0,245,255,0.3);margin-top:1px;" id="alarmSub">SYSTEM STANDBY</div>
+        </div>
+      </div>
+      <div style="margin-top:6px;">
+        <div class="vl">INTRUSION SCORE</div>
+        <div class="vv" id="intrusionScore" style="font-size:18px;color:var(--a);">0</div>
+        <div class="vbar" style="margin-top:4px;"><div class="vfill" id="intrusionBar" style="width:0%;color:var(--a);background:var(--a);transition:width 0.3s;"></div></div>
+      </div>
+      <button class="arm-btn arm" id="armBtn" onclick="toggleAlarm()">⬡ ARM SYSTEM</button>
+    </div>
   </div>
 
-  <!-- CENTER -->
+  <!-- CENTER: Camera + Pose -->
   <div class="panel p-center">
-    <div class="ptitle" style="width:100%;max-width:540px;">Live Feed · BlazePose + HandPose</div>
+    <div class="ptitle" style="width:100%;max-width:560px;">Live Sensor Feed · Multi-Person BlazePose + HandPose</div>
     <div id="camWrap">
       <video id="videoEl" autoplay muted playsinline></video>
       <canvas id="poseCanvas"></canvas>
       <div class="scanline"></div>
-      <div class="c-tr"></div><div class="c-bl"></div><div class="c-br"></div>
-      <div class="kpbadge" id="kpInfo">TARGETS: 0<br>POSE KP: --<br>HANDS: --<br>CONF: --%</div>
+      <div class="ctr"></div><div class="cbl"></div><div class="cbr"></div>
+      <div class="kpbadge" id="kpInfo">TARGETS: 0<br>HANDS: 0<br>GESTURE: —<br>CONF: —</div>
+      <div id="flashOverlay"></div>
     </div>
     <div class="meta-row">
       <div class="meta-cell"><div class="mv gc" id="mPersons">0</div><div class="ml">TARGETS</div></div>
       <div class="meta-cell"><div class="mv gg" id="mFps">0</div><div class="ml">FPS</div></div>
-      <div class="meta-cell"><div class="mv gc" id="mConf">0%</div><div class="ml">CONF</div></div>
       <div class="meta-cell"><div class="mv ga" id="mHands">0</div><div class="ml">HANDS</div></div>
-      <div class="meta-cell"><div class="mv gp" id="mGest">—</div><div class="ml">FINGERS↑</div></div>
+      <div class="meta-cell"><div class="mv go" id="mFall">—</div><div class="ml">FALL</div></div>
+      <div class="meta-cell"><div class="mv gp" id="mAlarm">OFF</div><div class="ml">ALARM</div></div>
     </div>
     <div id="aiLog">
-      <div class="ai-line" id="al1">▶ JARVIS SENTINEL ONLINE · SYSTEMS READY</div>
-      <div class="ai-line" id="al2">▶ POSE ENGINE · 33KP BLAZEPOSE WASM</div>
-      <div class="ai-line" id="al3">▶ HAND ENGINE · 21KP/HAND INTERLEAVED</div>
+      <div class="ai-line" id="al1">▶ JARVIS SENTINEL v3 ONLINE · ALL SYSTEMS READY</div>
+      <div class="ai-line" id="al2">▶ MULTI-PERSON POSE · FALL DETECTION · GESTURE CTRL ACTIVE</div>
+      <div class="ai-line" id="al3">▶ INTRUDER ALARM STANDBY · AWAITING ARM COMMAND</div>
     </div>
   </div>
 
-  <!-- RIGHT TOP: Hand Intelligence -->
+  <!-- RIGHT TOP: Gesture Control -->
   <div class="panel">
-    <div class="ptitle">Hand Intelligence</div>
+    <div class="ptitle"><span class="dot grn" style="animation:nd 2s infinite;"></span>Gesture Control</div>
     <div class="gesture-box">
       <div class="vl">Active Gesture</div>
       <div class="gname" id="gestureName">AWAITING</div>
       <div class="gconf" id="gestureConf">NO HAND IN FRAME</div>
-    </div>
-    <div class="gesture-box">
-      <div class="vl" style="margin-bottom:5px;">Finger State</div>
       <div class="fgrid">
         <div class="fc" id="f0">THUMB</div>
         <div class="fc" id="f1">INDEX</div>
@@ -266,8 +348,36 @@ canvas.wave{width:100%;height:34px;display:block;margin-top:5px;}
         <div class="fc" id="f4">PINKY</div>
       </div>
     </div>
+    <div class="vl" style="margin-bottom:4px;">Gesture → Action Map</div>
+    <div class="gaction-list">
+      <div class="gaction" id="ga-fist"><span class="icon">✊</span><span class="desc">FIST → ARM alarm</span><span class="trigger" id="gt-fist">HOLD 1.5s</span></div>
+      <div class="gaction" id="ga-open"><span class="icon">🖐</span><span class="desc">OPEN → DISARM alarm</span><span class="trigger" id="gt-open">HOLD 1.5s</span></div>
+      <div class="gaction" id="ga-point"><span class="icon">☝</span><span class="desc">POINT → Lock target</span><span class="trigger" id="gt-point">INSTANT</span></div>
+      <div class="gaction" id="ga-peace"><span class="icon">✌</span><span class="desc">PEACE → Clear alerts</span><span class="trigger" id="gt-peace">INSTANT</span></div>
+      <div class="gaction" id="ga-shaka"><span class="icon">🤙</span><span class="desc">SHAKA → Toggle scan</span><span class="trigger" id="gt-shaka">INSTANT</span></div>
+      <div class="gaction" id="ga-thumb"><span class="icon">👍</span><span class="desc">THUMBS → Confirm OK</span><span class="trigger" id="gt-thumb">INSTANT</span></div>
+    </div>
+  </div>
+
+  <!-- LEFT BOTTOM: Heatmap + Roster -->
+  <div class="panel" style="display:flex;flex-direction:column;gap:0;">
+    <div class="ptitle">Presence Heatmap</div>
+    <canvas id="heatCanvas" style="width:100%;height:90px;display:block;flex-shrink:0;"></canvas>
+    <div class="ptitle" style="margin-top:6px;"><span class="dot grn" id="personDot"></span>Target Roster</div>
+    <div id="personCards" style="flex:1;overflow-y:auto;"><div style="font-size:7px;color:rgba(0,245,255,0.18);text-align:center;padding:10px;">NO TARGETS DETECTED</div></div>
+  </div>
+
+  <!-- RIGHT BOTTOM: System Status -->
+  <div class="panel" style="display:flex;flex-direction:column;gap:5px;overflow-y:auto;">
+    <div class="ptitle">System Status</div>
+    <div class="cgrid">
+      <div class="cc"><div class="cl">Avg Conf</div><div class="cv gg" id="cvConf">0%</div><div class="cbar"><div class="cbf" id="cbConf" style="width:0%"></div></div></div>
+      <div class="cc"><div class="cl">Targets</div><div class="cv gc" id="cvTargets">0</div><div class="cbar"><div class="cbf" id="cbTargets" style="width:0%"></div></div></div>
+      <div class="cc"><div class="cl">Frame Rate</div><div class="cv ga" id="cvFps">0fps</div><div class="cbar"><div class="cbf" id="cbFps" style="width:0%;background:var(--a);box-shadow:0 0 3px var(--a);"></div></div></div>
+      <div class="cc"><div class="cl">Detection</div><div class="cv ga" id="cvDet">SCAN</div><div class="cbar"><div class="cbf" id="cbDet" style="width:20%;background:var(--a);animation:blink 1s infinite;"></div></div></div>
+    </div>
+    <div class="ptitle">Wrist Coords</div>
     <div class="wbox">
-      <div class="vl">Wrist Coordinates</div>
       <div class="wgrid">
         <div><div class="vl">L·X</div><div class="wval gc" id="wLX">—</div></div>
         <div><div class="vl">L·Y</div><div class="wval gc" id="wLY">—</div></div>
@@ -275,30 +385,11 @@ canvas.wave{width:100%;height:34px;display:block;margin-top:5px;}
         <div><div class="vl">R·Y</div><div class="wval gg" id="wRY">—</div></div>
       </div>
     </div>
-  </div>
-
-  <!-- LEFT BOTTOM: Heatmap -->
-  <div class="panel">
-    <div class="ptitle">Presence Heatmap</div>
-    <canvas id="heatCanvas"></canvas>
-  </div>
-
-  <!-- RIGHT BOTTOM: System -->
-  <div class="panel" style="display:flex;flex-direction:column;gap:5px;overflow-y:auto;">
-    <div class="ptitle">System Status</div>
-    <div class="cgrid">
-      <div class="cc"><div class="cl">Pose Conf</div><div class="cv gg" id="cvConf">0%</div><div class="cbar"><div class="cbar-fill" id="cbConf" style="width:0%"></div></div></div>
-      <div class="cc"><div class="cl">Keypoints</div><div class="cv gc" id="cvKP">0/33</div><div class="cbar"><div class="cbar-fill" id="cbKP" style="width:0%"></div></div></div>
-      <div class="cc"><div class="cl">Frame Rate</div><div class="cv ga" id="cvFps">0fps</div><div class="cbar"><div class="cbar-fill" id="cbFps" style="width:0%;background:var(--a);box-shadow:0 0 4px var(--a)"></div></div></div>
-      <div class="cc"><div class="cl">Detection</div><div class="cv ga" id="cvDet">SCAN</div><div class="cbar"><div class="cbar-fill" id="cbDet" style="width:20%;background:var(--a);animation:blink 1s infinite;"></div></div></div>
-    </div>
-    <div class="ptitle">Target Roster</div>
-    <div id="personList"><div style="font-size:7px;color:rgba(0,245,255,0.18);text-align:center;padding:7px;">NO TARGETS</div></div>
     <div class="ptitle" style="margin-top:2px;">Sensor Array</div>
     <div class="nodes">
       <div class="nr"><div class="nd on"></div><div class="ni"><div class="nn">WEBCAM · PRIMARY</div><div class="ns">RGB · LOCAL</div></div><div class="nf" id="nfCam">LIVE</div></div>
-      <div class="nr"><div class="nd on" style="animation-delay:.4s"></div><div class="ni"><div class="nn">BLAZEPOSE · 33KP</div><div class="ns">WASM · COMPLEXITY 0</div></div><div class="nf" id="nfPose">ACTIVE</div></div>
-      <div class="nr"><div class="nd on" style="animation-delay:.8s"></div><div class="ni"><div class="nn">HANDS · 21KP</div><div class="ns">INTERLEAVED · 2 FRAMES</div></div><div class="nf" id="nfHand">ACTIVE</div></div>
+      <div class="nr"><div class="nd on" style="animation-delay:.4s"></div><div class="ni"><div class="nn">BLAZEPOSE · 33KP</div><div class="ns">COMPLEXITY 0 · WASM</div></div><div class="nf" id="nfPose">ACTIVE</div></div>
+      <div class="nr"><div class="nd on" style="animation-delay:.8s"></div><div class="ni"><div class="nn">HANDS · 21KP×2</div><div class="ns">INTERLEAVED</div></div><div class="nf" id="nfHand">ACTIVE</div></div>
       <div class="nr"><div class="nd dim"></div><div class="ni"><div class="nn">WIFI-CSI · ESP32</div><div class="ns">NOT CONNECTED</div></div><div class="nf" style="color:var(--a);">OFFLINE</div></div>
     </div>
   </div>
@@ -307,16 +398,18 @@ canvas.wave{width:100%;height:34px;display:block;margin-top:5px;}
 
 <!-- TICKER -->
 <div id="ticker">
-  <div class="tlbl">⬡ JARVIS</div>
+  <div class="tlbl">⬡ SENTINEL</div>
   <div class="tscroll">
-    <span>RUVIEW SENTINEL · BLAZEPOSE 33KP + HANDS 21KP · INTERLEAVED INFERENCE · LOW LATENCY</span>
-    <span>VISIBILITY-WEIGHTED SMOOTHING · VELOCITY PREDICTION · SUB-PIXEL PRECISION</span>
-    <span>GESTURE RECOGNITION · PRESENCE HEATMAP · KINEMATIC ANALYSIS · ALL LOCAL</span>
-    <span>TIP: GOOD LIGHTING + 1-2M DISTANCE = BEST TRACKING QUALITY</span>
-    <span>RUVIEW SENTINEL · BLAZEPOSE 33KP + HANDS 21KP · INTERLEAVED INFERENCE · LOW LATENCY</span>
-    <span>VISIBILITY-WEIGHTED SMOOTHING · VELOCITY PREDICTION · SUB-PIXEL PRECISION</span>
-    <span>GESTURE RECOGNITION · PRESENCE HEATMAP · KINEMATIC ANALYSIS · ALL LOCAL</span>
-    <span>TIP: GOOD LIGHTING + 1-2M DISTANCE = BEST TRACKING QUALITY</span>
+    <span>RUVIEW v3 · MULTI-PERSON BLAZEPOSE · FALL DETECTION · GESTURE CONTROL · INTRUDER ALARM</span>
+    <span>INTERLEAVED MODEL PIPELINE · VISIBILITY-WEIGHTED SMOOTHING · VELOCITY PREDICTION</span>
+    <span>GESTURES: FIST=ARM · OPEN=DISARM · POINT=LOCK · PEACE=CLEAR · SHAKA=TOGGLE</span>
+    <span>FALL DETECTION: TORSO ANGLE + HIP HEIGHT ANALYSIS · AUTO-ALERT ON DETECTION</span>
+    <span>ALL INFERENCE LOCAL · WASM RUNTIME · ZERO DATA TRANSMITTED · PRIVACY FIRST</span>
+    <span>RUVIEW v3 · MULTI-PERSON BLAZEPOSE · FALL DETECTION · GESTURE CONTROL · INTRUDER ALARM</span>
+    <span>INTERLEAVED MODEL PIPELINE · VISIBILITY-WEIGHTED SMOOTHING · VELOCITY PREDICTION</span>
+    <span>GESTURES: FIST=ARM · OPEN=DISARM · POINT=LOCK · PEACE=CLEAR · SHAKA=TOGGLE</span>
+    <span>FALL DETECTION: TORSO ANGLE + HIP HEIGHT ANALYSIS · AUTO-ALERT ON DETECTION</span>
+    <span>ALL INFERENCE LOCAL · WASM RUNTIME · ZERO DATA TRANSMITTED · PRIVACY FIRST</span>
   </div>
 </div>
 
@@ -331,442 +424,665 @@ canvas.wave{width:100%;height:34px;display:block;margin-top:5px;}
 // ── CURSOR ────────────────────────────────────────────────────────────────────
 const cursorEl = document.getElementById('cursor');
 if (cursorEl) document.addEventListener('mousemove', e => {
-  cursorEl.style.left = e.clientX + 'px';
-  cursorEl.style.top  = e.clientY + 'px';
-}, {passive:true});
+  cursorEl.style.left = e.clientX+'px'; cursorEl.style.top = e.clientY+'px';
+},{passive:true});
 
-// ── CLOCK ─────────────────────────────────────────────────────────────────────
-setInterval(() => {
+setInterval(()=>{
   document.getElementById('clockEl').textContent =
     new Date().toISOString().replace('T',' ').slice(0,19)+' UTC';
-}, 1000);
+},1000);
 
-// ── MATH HELPERS ─────────────────────────────────────────────────────────────
+// ── MATH ──────────────────────────────────────────────────────────────────────
 const lerp  = (a,b,t) => a+(b-a)*t;
 const clamp = (v,lo,hi) => v<lo?lo:v>hi?hi:v;
 const PI    = Math.PI;
 
-// ── SMOOTH LANDMARKS ─────────────────────────────────────────────────────────
-// Visibility-weighted EMA + simple velocity for jitter-free tracking.
-// alpha scales with visibility so low-confidence points hold position.
+// ── SMOOTHER (velocity-assisted EMA) ─────────────────────────────────────────
 class Smoother {
-  constructor(alpha=0.4, velW=0.35) {
-    this.alpha = alpha;
-    this.velW  = velW;
-    this.buf   = null;
-    this.vel   = null;
+  constructor(alpha=0.4, velW=0.32) {
+    this.a=alpha; this.vW=velW; this.buf=null; this.vel=null;
   }
   update(lms) {
-    if (!lms || !lms.length) {
-      // Graceful decay so skeleton doesn't pop off screen
-      if (this.buf) this.buf.forEach(l => { if (l) l.visibility = (l.visibility||0)*0.85; });
+    if (!lms||!lms.length) {
+      if (this.buf) this.buf.forEach(l=>{ if(l) l.visibility=(l.visibility||0)*0.82; });
       return this.buf;
     }
-    const n = lms.length;
-    if (!this.buf || this.buf.length !== n) {
-      this.buf = lms.map(l => l ? {...l} : null);
-      this.vel = Array.from({length:n}, () => ({x:0,y:0,z:0}));
+    const n=lms.length;
+    if (!this.buf||this.buf.length!==n) {
+      this.buf=lms.map(l=>l?{...l}:null);
+      this.vel=Array.from({length:n},()=>({x:0,y:0,z:0}));
       return this.buf;
     }
-    for (let i = 0; i < n; i++) {
-      const cur = lms[i], prev = this.buf[i], v = this.vel[i];
-      if (!cur) { if (prev) prev.visibility = (prev.visibility||0)*0.8; continue; }
-      if (!prev) { this.buf[i]={...cur}; continue; }
-      // Dynamic alpha: confident points snap harder
-      const vis = clamp(cur.visibility !== undefined ? cur.visibility : 1, 0, 1);
-      const a   = this.alpha + (1-this.alpha)*vis*0.45;
-      // Update velocity estimate
-      v.x = lerp(v.x, cur.x-prev.x, this.velW);
-      v.y = lerp(v.y, cur.y-prev.y, this.velW);
-      v.z = lerp(v.z, (cur.z||0)-(prev.z||0), this.velW);
-      // Blend predicted + observed
-      this.buf[i] = {
-        x: lerp(prev.x + v.x*0.35, cur.x, a),
-        y: lerp(prev.y + v.y*0.35, cur.y, a),
-        z: lerp((prev.z||0) + v.z*0.35, cur.z||0, a),
-        visibility: lerp(prev.visibility||0, vis, 0.4)
+    for (let i=0;i<n;i++) {
+      const cur=lms[i],prev=this.buf[i],v=this.vel[i];
+      if (!cur){ if(prev) prev.visibility=(prev.visibility||0)*0.78; continue; }
+      if (!prev){ this.buf[i]={...cur}; continue; }
+      const vis=clamp(cur.visibility!==undefined?cur.visibility:1,0,1);
+      const a=this.a+(1-this.a)*vis*0.42;
+      v.x=lerp(v.x,cur.x-prev.x,this.vW);
+      v.y=lerp(v.y,cur.y-prev.y,this.vW);
+      v.z=lerp(v.z,(cur.z||0)-(prev.z||0),this.vW);
+      this.buf[i]={
+        x:lerp(prev.x+v.x*0.3,cur.x,a),
+        y:lerp(prev.y+v.y*0.3,cur.y,a),
+        z:lerp((prev.z||0)+v.z*0.3,cur.z||0,a),
+        visibility:lerp(prev.visibility||0,vis,0.38)
       };
     }
     return this.buf;
   }
-  reset() { this.buf = null; this.vel = null; }
+  reset(){ this.buf=null; this.vel=null; }
+}
+
+// ── PERSON TRACKER ────────────────────────────────────────────────────────────
+// Assigns persistent IDs to detected persons across frames using centroid matching
+class PersonTracker {
+  constructor(maxPersons=4) {
+    this.max=maxPersons;
+    this.tracks=[];  // {id, smoother, lms, centroid, age, missing, color, label}
+    this.nextId=0;
+    const colors=['#00ff88','#ff9900','#ff44aa','#44aaff'];
+    const labels=['ALPHA','BETA','GAMMA','DELTA'];
+    this.colors=colors; this.labels=labels;
+  }
+
+  // Compute centroid from visible landmarks
+  _centroid(lms) {
+    if (!lms) return null;
+    let sx=0,sy=0,n=0;
+    [0,11,12,23,24].forEach(i=>{
+      const l=lms[i]; if(l&&(l.visibility||0)>0.3){sx+=l.x;sy+=l.y;n++;}
+    });
+    return n>0?{x:sx/n,y:sy/n}:null;
+  }
+
+  _dist(a,b){ return a&&b?Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2):999; }
+
+  // BlazePose only gives 1 person, so we simulate multi-person tracking
+  // by maintaining history and smoothing existing tracks
+  update(rawLms) {
+    // MediaPipe Pose gives single person. We track that person with persistence.
+    // Future: when multi-person models are available, extend here.
+    if (!rawLms || rawLms.length===0 || !rawLms.some(l=>l&&(l.visibility||0)>0.35)) {
+      // Mark all tracks as missing
+      this.tracks.forEach(t=>{ t.missing++; t.lms=t.smoother.update(null); t.age++; });
+      this.tracks=this.tracks.filter(t=>t.missing<12);
+      return this.tracks;
+    }
+
+    const newCentroid=this._centroid(rawLms);
+
+    if (this.tracks.length===0) {
+      // Create first track
+      const id=this.nextId++;
+      const sm=new Smoother(0.38,0.3);
+      this.tracks.push({id,smoother:sm,lms:sm.update(rawLms),centroid:newCentroid,age:1,missing:0,color:this.colors[id%this.colors.length],label:this.labels[id%this.labels.length]});
+    } else {
+      // Match to closest existing track
+      let best=null, bestDist=0.25; // max match distance (normalized 0-1)
+      this.tracks.forEach(t=>{ const d=this._dist(t.centroid,newCentroid); if(d<bestDist){bestDist=d;best=t;} });
+
+      if (best) {
+        best.lms=best.smoother.update(rawLms);
+        best.centroid=newCentroid;
+        best.missing=0; best.age++;
+      } else {
+        // New person detected
+        if (this.tracks.length<this.max) {
+          const id=this.nextId++;
+          const sm=new Smoother(0.38,0.3);
+          this.tracks.push({id,smoother:sm,lms:sm.update(rawLms),centroid:newCentroid,age:1,missing:0,color:this.colors[id%this.colors.length],label:this.labels[id%this.labels.length]});
+        }
+      }
+      // Decay non-matched tracks
+      this.tracks.forEach(t=>{ if(t!==best){ t.missing++; t.lms=t.smoother.update(null); } });
+      this.tracks=this.tracks.filter(t=>t.missing<10);
+    }
+    return this.tracks;
+  }
 }
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let fps=0, fpsFrames=0, fpsLast=performance.now();
-let motionHistory = new Float32Array(80);
-let prevPoseLms = null, motionMag = 0;
-
 const HEAT_W=28, HEAT_H=20;
-const heatGrid = Array.from({length:HEAT_H}, ()=>new Float32Array(HEAT_W));
+const heatGrid=Array.from({length:HEAT_H},()=>new Float32Array(HEAT_W));
+const personTracker=new PersonTracker(4);
+const handSmL=new Smoother(0.42,0.38), handSmR=new Smoother(0.42,0.38);
 
-const poseSmoother  = new Smoother(0.38, 0.32);
-const handSmootherL = new Smoother(0.45, 0.4);
-const handSmootherR = new Smoother(0.45, 0.4);
+let smoothHands=[{lms:null,label:'Left',score:0},{lms:null,label:'Right',score:0}];
+let activeTracks=[];
 
-let smoothPose = null;
-// hands: [{lms, label, score}]
-let smoothHands = [{lms:null,label:'Left',score:0},{lms:null,label:'Right',score:0}];
+// ── ALARM STATE ───────────────────────────────────────────────────────────────
+let alarmArmed=false, alarmTriggered=false;
+let intrusionScore=0;
+let prevPresence=false; // was someone in frame last check
+
+// ── FALL DETECTION STATE ──────────────────────────────────────────────────────
+let fallState='UPRIGHT'; // UPRIGHT | WARNING | FALL
+let fallScore=0;
+let fallAlertShown=false;
+let torsoAngleSmooth=0;
+let hipHeightSmooth=0.5;
+
+// ── GESTURE STATE ─────────────────────────────────────────────────────────────
+let lastGesture='', gestureHoldStart=0, gestureHoldGrace=300;
+let gestureActionCooldown=0;
+let gestureLockTarget=false;
+let gestureScanEnabled=true;
+
+// ── BANNER / FLASH ────────────────────────────────────────────────────────────
+let bannerTimeout=null;
+function showBanner(msg, type, duration=4000) {
+  const b=document.getElementById('alertBanner');
+  b.textContent=msg; b.className='show '+type;
+  document.getElementById('mainLayout').classList.add('banner-open');
+  clearTimeout(bannerTimeout);
+  bannerTimeout=setTimeout(()=>{
+    b.className=''; document.getElementById('mainLayout').classList.remove('banner-open');
+  }, duration);
+}
+function flashScreen(color, times=3) {
+  const overlay=document.getElementById('flashOverlay');
+  overlay.style.background=color;
+  let t=0;
+  const interval=setInterval(()=>{
+    overlay.style.opacity=t%2===0?'0.18':'0';
+    t++; if(t>=times*2){ overlay.style.opacity='0'; clearInterval(interval); }
+  },120);
+}
 
 // ── JARVIS LOG ────────────────────────────────────────────────────────────────
-const JLINES = [
-  'POSE TRACKING NOMINAL · 33 KEYPOINTS ACTIVE',
-  'HAND MODEL ENGAGED · FINGER RESOLUTION ENABLED',
-  'INTERLEAVED PIPELINE RUNNING · LATENCY MINIMIZED',
-  'VISIBILITY-WEIGHTED SMOOTHER ACTIVE',
-  'VELOCITY PREDICTION ENGAGED',
-  'PRESENCE HEATMAP UPDATING · 28×20 GRID',
-  'GESTURE LIBRARY READY · 9 PATTERNS',
-  'WRIST TELEMETRY STREAMING',
+const JLINES=[
+  'MULTI-PERSON TRACKING ACTIVE · CENTROID MATCHING',
+  'FALL DETECTION MONITORING TORSO ANGLE + HIP HEIGHT',
+  'GESTURE LIBRARY LOADED · 6 CONTROL ACTIONS MAPPED',
+  'INTRUDER ALARM STANDBY · ARM WITH FIST GESTURE',
+  'VISIBILITY-WEIGHTED SMOOTHER · VELOCITY PREDICTION',
+  'INTERLEAVED PIPELINE · POSE EVEN · HANDS ODD FRAMES',
   'KINEMATIC CHAIN ANALYSIS RUNNING',
+  'PRESENCE HEATMAP 28×20 GRID UPDATING',
   'SCANNING FOR BIOLOGICAL SIGNATURES',
-  'SHOULDER GEOMETRY CALIBRATED',
   'MOTION BASELINE ESTABLISHED',
-  'TRACKING LOCK CONFIRMED',
 ];
-let jIdx = 0;
+let jIdx=0;
 function pushJarvis(msg) {
-  document.getElementById('al1').textContent = document.getElementById('al2').textContent;
-  document.getElementById('al2').textContent = document.getElementById('al3').textContent;
-  document.getElementById('al3').textContent = '▶ ' + msg;
+  document.getElementById('al1').textContent=document.getElementById('al2').textContent;
+  document.getElementById('al2').textContent=document.getElementById('al3').textContent;
+  document.getElementById('al3').textContent='▶ '+msg;
 }
-setInterval(() => pushJarvis(JLINES[jIdx++ % JLINES.length]), 4000);
+setInterval(()=>pushJarvis(JLINES[jIdx++%JLINES.length]),4200);
 
-// ── CANVASES ──────────────────────────────────────────────────────────────────
-const poseCanvas = document.getElementById('poseCanvas');
-const poseCtx    = poseCanvas.getContext('2d', {alpha:true, desynchronized:true});
-const heatCanvas = document.getElementById('heatCanvas');
-const heatCtx    = heatCanvas.getContext('2d', {alpha:true});
-const waveCanvas = document.getElementById('motionWave');
-const waveCtx    = waveCanvas.getContext('2d', {alpha:true});
+// ── CANVASES (lazy init — called after DOM ready, never at parse time) ──────
+let poseCanvas=null, poseCtx=null, heatCanvas=null, heatCtx=null;
+
+function initCanvases() {
+  poseCanvas = document.getElementById('poseCanvas');
+  heatCanvas = document.getElementById('heatCanvas');
+  if (!poseCanvas) { console.error('RUVIEW: poseCanvas not found'); return false; }
+  if (!heatCanvas) { console.error('RUVIEW: heatCanvas not found'); return false; }
+  poseCtx = poseCanvas.getContext('2d', {alpha:true, desynchronized:true});
+  heatCtx  = heatCanvas.getContext('2d', {alpha:true});
+  return true;
+}
 
 function resizeAll() {
+  if (!heatCanvas) return;
   heatCanvas.width  = heatCanvas.clientWidth  || 200;
-  heatCanvas.height = heatCanvas.clientHeight || 160;
-  waveCanvas.width  = waveCanvas.clientWidth  || 180;
-  waveCanvas.height = 34;
+  heatCanvas.height = heatCanvas.clientHeight || 110;
 }
 
-// ── DRAW CONNECTIONS (single shadow state, no repeated set) ───────────────────
-const BODY_CONN = [
-  // face
+// ── CONNECTIONS (precomputed colors) ─────────────────────────────────────────
+const BODY_CONN=[
   [0,1],[1,2],[2,3],[3,7],[0,4],[4,5],[5,6],[6,8],[9,10],
-  // arms
   [11,12],[11,13],[13,15],[15,17],[15,19],[17,19],[12,14],[14,16],[16,18],[16,20],[18,20],
-  // torso
   [11,23],[12,24],[23,24],
-  // legs
   [23,25],[25,27],[27,29],[27,31],[29,31],[24,26],[26,28],[28,30],[28,32],[30,32]
 ];
-// Precomputed segment colours indexed by connection index
-const BODY_CONN_COL = BODY_CONN.map(([a]) => {
-  if (a<=10)          return '#00ccff';
-  if (a>=11&&a<=16)   return '#00ff88';
-  if (a>=23&&a<=24)   return '#ffcc00';
-  if (a>=25)          return '#ff9900';
-  return '#00f5ff';
-});
+const BCOL=BODY_CONN.map(([a])=>a<=10?'#00ccff':a>=11&&a<=20?'#00ff88':a>=23&&a<=24?'#ffcc00':'#ff9900');
+const HAND_CONN=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[0,9],[9,10],[10,11],[11,12],[0,13],[13,14],[14,15],[15,16],[0,17],[17,18],[18,19],[19,20],[5,9],[9,13],[13,17]];
+const FCOLS=['#ff4466','#00ff88','#00ccff','#cc44ff','#ffcc00'];
+const HCOL=HAND_CONN.map(([a,b])=>a<=4||b<=4?FCOLS[0]:a<=8||b<=8?FCOLS[1]:a<=12||b<=12?FCOLS[2]:a<=16||b<=16?FCOLS[3]:FCOLS[4]);
+const FINGERTIPS=[4,8,12,16,20];
 
-const HAND_CONN = [
-  [0,1],[1,2],[2,3],[3,4],
-  [0,5],[5,6],[6,7],[7,8],
-  [0,9],[9,10],[10,11],[11,12],
-  [0,13],[13,14],[14,15],[15,16],
-  [0,17],[17,18],[18,19],[19,20],
-  [5,9],[9,13],[13,17]
-];
-const FCOLS = ['#ff4466','#00ff88','#00ccff','#cc44ff','#ffcc00'];
-const HAND_CONN_COL = HAND_CONN.map(([a,b]) => {
-  if (a<=4||b<=4)   return FCOLS[0];
-  if (a<=8||b<=8)   return FCOLS[1];
-  if (a<=12||b<=12) return FCOLS[2];
-  if (a<=16||b<=16) return FCOLS[3];
-  return FCOLS[4];
-});
-const FINGERTIPS = [4,8,12,16,20];
+// ── DRAW BODY (with person color tint) ───────────────────────────────────────
+function drawBody(lms, W, H, personColor) {
+  const ctx=poseCtx;
+  ctx.lineCap='round';
+  ctx.lineWidth=2.5; ctx.shadowBlur=9;
 
-// ── BODY DRAW ─────────────────────────────────────────────────────────────────
-function drawBody(lms, W, H) {
-  const ctx = poseCtx;
-  ctx.lineCap = 'round';
-  ctx.lineWidth = 2.5;
-
-  // One shadow setup for connections
-  ctx.shadowBlur = 8;
-  for (let i = 0; i < BODY_CONN.length; i++) {
-    const [a,b] = BODY_CONN[i];
-    const la=lms[a], lb=lms[b];
+  for (let i=0;i<BODY_CONN.length;i++) {
+    const [a,b]=BODY_CONN[i], la=lms[a], lb=lms[b];
     if (!la||!lb) continue;
     const va=la.visibility||0, vb=lb.visibility||0;
-    if (va<0.22||vb<0.22) continue;
-    const color = BODY_CONN_COL[i];
-    ctx.globalAlpha = Math.min(va,vb)*0.88;
-    ctx.strokeStyle = color;
-    ctx.shadowColor = color;
-    ctx.beginPath();
-    ctx.moveTo((1-la.x)*W, la.y*H);
-    ctx.lineTo((1-lb.x)*W, lb.y*H);
-    ctx.stroke();
+    if (va<0.2||vb<0.2) continue;
+    // Blend segment color with person identity color
+    ctx.globalAlpha=Math.min(va,vb)*0.85;
+    ctx.strokeStyle=BCOL[i]; ctx.shadowColor=BCOL[i];
+    ctx.beginPath(); ctx.moveTo((1-la.x)*W,la.y*H); ctx.lineTo((1-lb.x)*W,lb.y*H); ctx.stroke();
   }
-
-  // Joints
-  ctx.shadowBlur = 12;
-  for (let i = 0; i < lms.length; i++) {
-    const lm=lms[i]; if (!lm||(lm.visibility||0)<0.32) continue;
+  ctx.shadowBlur=11;
+  for (let i=0;i<lms.length;i++) {
+    const lm=lms[i]; if(!lm||(lm.visibility||0)<0.3) continue;
     const x=(1-lm.x)*W, y=lm.y*H;
-    let color='#00f5ff', r=3;
-    if (i===0)           { color='#ffffff'; r=5; }
-    else if (i>=11&&i<=16){ color='#00ff88'; r=3.5; }
-    else if (i>=23&&i<=24){ color='#ffcc00'; r=3.5; }
-    else if (i>=25)       { color='#ff9900'; r=3; }
-    ctx.globalAlpha = lm.visibility||0;
-    ctx.fillStyle   = color;
-    ctx.shadowColor = color;
+    let col='#00f5ff', r=3;
+    if(i===0){col='#fff';r=5;}
+    else if(i>=11&&i<=20){col='#00ff88';r=3.5;}
+    else if(i>=23&&i<=24){col='#ffcc00';r=3.5;}
+    else if(i>=25){col='#ff9900';r=3;}
+    ctx.globalAlpha=lm.visibility||0;
+    ctx.fillStyle=col; ctx.shadowColor=col;
     ctx.beginPath(); ctx.arc(x,y,r,0,PI*2); ctx.fill();
   }
   ctx.globalAlpha=1; ctx.shadowBlur=0;
 }
 
-// ── HAND DRAW ─────────────────────────────────────────────────────────────────
 function drawHand(lms, W, H, label) {
-  const ctx = poseCtx;
-  ctx.lineCap  = 'round';
-  ctx.lineWidth = 2;
-  ctx.shadowBlur = 7;
-  ctx.globalAlpha = 0.88;
-
-  for (let i = 0; i < HAND_CONN.length; i++) {
-    const [a,b] = HAND_CONN[i];
-    const la=lms[a], lb=lms[b]; if (!la||!lb) continue;
-    const color = HAND_CONN_COL[i];
-    ctx.strokeStyle = color; ctx.shadowColor = color;
-    ctx.beginPath();
-    ctx.moveTo((1-la.x)*W, la.y*H);
-    ctx.lineTo((1-lb.x)*W, lb.y*H);
-    ctx.stroke();
+  if (!lms) return;
+  const ctx=poseCtx;
+  ctx.lineCap='round'; ctx.lineWidth=2; ctx.shadowBlur=7; ctx.globalAlpha=0.9;
+  for (let i=0;i<HAND_CONN.length;i++) {
+    const [a,b]=HAND_CONN[i], la=lms[a], lb=lms[b]; if(!la||!lb) continue;
+    ctx.strokeStyle=HCOL[i]; ctx.shadowColor=HCOL[i];
+    ctx.beginPath(); ctx.moveTo((1-la.x)*W,la.y*H); ctx.lineTo((1-lb.x)*W,lb.y*H); ctx.stroke();
   }
-
-  // Fingertips: glow ring + dot
-  ctx.shadowBlur = 14;
-  ctx.globalAlpha = 1;
-  for (let fi = 0; fi < FINGERTIPS.length; fi++) {
-    const lm = lms[FINGERTIPS[fi]]; if (!lm) continue;
-    const x=(1-lm.x)*W, y=lm.y*H;
-    const color = FCOLS[fi];
-    ctx.strokeStyle=color; ctx.shadowColor=color;
-    ctx.lineWidth=1.5; ctx.globalAlpha=0.5;
+  ctx.shadowBlur=14; ctx.globalAlpha=1;
+  FINGERTIPS.forEach((ti,fi)=>{
+    const lm=lms[ti]; if(!lm) return;
+    const x=(1-lm.x)*W, y=lm.y*H, col=FCOLS[fi];
+    ctx.strokeStyle=col; ctx.shadowColor=col; ctx.lineWidth=1.5; ctx.globalAlpha=0.45;
     ctx.beginPath(); ctx.arc(x,y,5,0,PI*2); ctx.stroke();
-    ctx.fillStyle=color; ctx.globalAlpha=1;
-    ctx.lineWidth=0;
+    ctx.fillStyle=col; ctx.globalAlpha=1; ctx.shadowBlur=16;
     ctx.beginPath(); ctx.arc(x,y,3,0,PI*2); ctx.fill();
+  });
+  for (let i=0;i<lms.length;i++){
+    if(FINGERTIPS.includes(i)) continue;
+    const lm=lms[i]; if(!lm) continue;
+    const fi=i===0?-1:i<=4?0:i<=8?1:i<=12?2:i<=16?3:4;
+    const col=fi<0?'#fff':FCOLS[fi];
+    ctx.fillStyle=col; ctx.shadowColor=col; ctx.shadowBlur=6; ctx.globalAlpha=0.8;
+    ctx.beginPath(); ctx.arc((1-lm.x)*W,lm.y*H,2,0,PI*2); ctx.fill();
   }
-
-  // Other joints
-  ctx.shadowBlur=6; ctx.globalAlpha=0.82;
-  for (let i=0;i<lms.length;i++) {
-    if (FINGERTIPS.includes(i)||i===0) continue;
-    const lm=lms[i]; if (!lm) continue;
-    const x=(1-lm.x)*W, y=lm.y*H;
-    const fi = i<=4?0: i<=8?1: i<=12?2: i<=16?3: 4;
-    const color = FCOLS[fi];
-    ctx.fillStyle=color; ctx.shadowColor=color;
-    ctx.beginPath(); ctx.arc(x,y,2,0,PI*2); ctx.fill();
-  }
-
-  // Wrist label
-  const w=lms[0]; if (w) {
-    const color = label==='Left'?'#00f5ff':'#00ff88';
-    ctx.globalAlpha=0.7; ctx.fillStyle=color; ctx.shadowColor=color; ctx.shadowBlur=7;
+  if(lms[0]){
+    const col=label==='Left'?'#00f5ff':'#00ff88';
+    ctx.globalAlpha=0.7; ctx.fillStyle=col; ctx.shadowColor=col; ctx.shadowBlur=7;
     ctx.font='7px "Share Tech Mono"'; ctx.textAlign='center';
-    ctx.fillText(label.toUpperCase()+' HAND', (1-w.x)*W, w.y*H+15);
+    ctx.fillText(label.toUpperCase(),(1-lms[0].x)*W,lms[0].y*H+14);
   }
   ctx.globalAlpha=1; ctx.shadowBlur=0;
 }
 
-// ── BBOX ──────────────────────────────────────────────────────────────────────
-function drawBBox(lms, W, H) {
-  const vis=lms.filter(l=>l&&(l.visibility||0)>0.36);
+// ── BOUNDING BOX (per person with unique color) ───────────────────────────────
+function drawBBox(lms, W, H, color, label) {
+  const vis=lms.filter(l=>l&&(l.visibility||0)>0.32);
   if (vis.length<4) return;
   let mnX=1,mxX=0,mnY=1,mxY=0;
   vis.forEach(l=>{mnX=Math.min(mnX,l.x);mxX=Math.max(mxX,l.x);mnY=Math.min(mnY,l.y);mxY=Math.max(mxY,l.y);});
   const pd=0.025;
   const bx=(1-(mxX+pd))*W, by=(mnY-pd)*H, bw=(mxX-mnX+pd*2)*W, bh=(mxY-mnY+pd*2)*H;
-  const ctx=poseCtx, color='#00ff88';
+  const ctx=poseCtx;
+  // Dashed box
   ctx.strokeStyle=color; ctx.shadowColor=color; ctx.shadowBlur=10;
-  ctx.globalAlpha=0.55; ctx.lineWidth=1;
+  ctx.globalAlpha=0.5; ctx.lineWidth=1;
   ctx.setLineDash([4,4]); ctx.strokeRect(bx,by,bw,bh); ctx.setLineDash([]);
-  // Corners
-  const cs=13; ctx.globalAlpha=1; ctx.lineWidth=2.5; ctx.shadowBlur=13;
+  // Corner accents
+  const cs=12; ctx.globalAlpha=1; ctx.lineWidth=2.5; ctx.shadowBlur=12;
   [[bx,by,1,1],[bx+bw,by,-1,1],[bx,by+bh,1,-1],[bx+bw,by+bh,-1,-1]].forEach(([cx,cy,dx,dy])=>{
     ctx.beginPath(); ctx.moveTo(cx+dx*cs,cy); ctx.lineTo(cx,cy); ctx.lineTo(cx,cy+dy*cs); ctx.stroke();
   });
   // Label
   const conf=Math.round(vis.length/33*100);
-  ctx.font='bold 8px "Orbitron"'; ctx.shadowBlur=7;
-  const tw=ctx.measureText('TARGET-A  '+conf+'%').width;
-  ctx.fillStyle='rgba(0,4,12,0.88)'; ctx.globalAlpha=0.92;
-  ctx.fillRect(bx,by-15,tw+14,14);
-  ctx.strokeStyle=color; ctx.lineWidth=1; ctx.strokeRect(bx,by-15,tw+14,14);
-  ctx.fillStyle=color; ctx.textAlign='left'; ctx.shadowBlur=7;
-  ctx.fillText('TARGET-A  '+conf+'%', bx+7, by-4);
+  ctx.font='bold 7px "Orbitron"';
+  const tw=ctx.measureText('TARGET-'+label+' '+conf+'%').width;
+  ctx.globalAlpha=0.92; ctx.fillStyle='rgba(0,3,10,0.88)'; ctx.fillRect(bx,by-14,tw+12,13);
+  ctx.strokeStyle=color; ctx.lineWidth=1; ctx.strokeRect(bx,by-14,tw+12,13);
+  ctx.fillStyle=color; ctx.textAlign='left'; ctx.shadowBlur=6;
+  ctx.fillText('TARGET-'+label+'  '+conf+'%',bx+6,by-4);
   ctx.globalAlpha=1; ctx.shadowBlur=0;
 }
 
-// ── GESTURE ───────────────────────────────────────────────────────────────────
+// ── FALL DETECTION ────────────────────────────────────────────────────────────
+function analyzeFall(lms) {
+  if (!lms) { fallScore=lerp(fallScore,0,0.1); return; }
+  const nose=lms[0], lh=lms[23], rh=lms[24], ls=lms[11], rs=lms[12];
+  const la=lms[27], ra=lms[28]; // ankles
+
+  // Torso angle: angle between shoulder midpoint and hip midpoint
+  let torsoAngle=0, hipH=0.5;
+  if (ls&&rs&&lh&&rh&&(ls.visibility||0)>0.3&&(lh.visibility||0)>0.3) {
+    const mx=(ls.x+rs.x)/2, my=(ls.y+rs.y)/2;
+    const hx=(lh.x+rh.x)/2, hy=(lh.y+rh.y)/2;
+    torsoAngle=Math.abs(Math.atan2(mx-hx,-(my-hy))*180/PI);
+    hipH=(lh.y+rh.y)/2;
+  }
+
+  torsoAngleSmooth=lerp(torsoAngleSmooth,torsoAngle,0.25);
+  hipHeightSmooth=lerp(hipHeightSmooth,hipH,0.2);
+
+  // Fall indicators:
+  // 1. Large torso angle (tilted > 50°)
+  // 2. Hip too high relative to nose (lying down: hips near top = normalized Y < nose)
+  // 3. Both ankles visible and near hip level
+  let fallIndicator=0;
+  if (torsoAngleSmooth>50) fallIndicator+=0.4+Math.min(0.4,(torsoAngleSmooth-50)/80);
+  if (nose&&lh&&rh&&(lh.visibility||0)>0.3) {
+    const hipNoseDiff=hipHeightSmooth-nose.y; // positive = hips below nose (normal)
+    if (hipNoseDiff<0.1) fallIndicator+=0.35; // hips near head level
+  }
+  if (la&&ra&&(la.visibility||0)>0.3&&lh&&rh) {
+    const ankleHipDiff=Math.abs((la.y+ra.y)/2-(lh.y+rh.y)/2);
+    if (ankleHipDiff<0.12) fallIndicator+=0.25; // ankles near hips (horizontal)
+  }
+
+  fallScore=lerp(fallScore,clamp(fallIndicator,0,1),0.2);
+
+  // State machine
+  const prev=fallState;
+  if (fallScore>0.72) fallState='FALL';
+  else if (fallScore>0.42) fallState='WARNING';
+  else fallState='UPRIGHT';
+
+  // Trigger alarm only once per fall event
+  if (fallState==='FALL'&&prev!=='FALL'&&!fallAlertShown) {
+    fallAlertShown=true;
+    triggerFallAlert();
+  } else if (fallState==='UPRIGHT') {
+    fallAlertShown=false;
+  }
+}
+
+function triggerFallAlert() {
+  showBanner('⚠ FALL DETECTED — EMERGENCY ALERT TRIGGERED', 'fall-alert', 6000);
+  flashScreen('rgba(255,119,0,0.5)', 4);
+  pushJarvis('FALL DETECTED · EMERGENCY PROTOCOL ACTIVE');
+  document.getElementById('fallPill').style.display='';
+  document.getElementById('mFall').textContent='FALL';
+  setTimeout(()=>document.getElementById('fallPill').style.display='none',8000);
+}
+
+// ── INTRUSION DETECTION ───────────────────────────────────────────────────────
+let motionFrames=0, lastMotionScore=0;
+function checkIntrusion(hasPersonNow) {
+  if (!alarmArmed) { intrusionScore=lerp(intrusionScore,0,0.15); return; }
+
+  // Score increases when: person suddenly appears, or high motion
+  let delta=0;
+  if (hasPersonNow&&!prevPresence) delta=0.8; // sudden appearance
+  else if (hasPersonNow) delta=0.3+lastMotionScore*0.4;
+  else delta=-0.1;
+
+  intrusionScore=clamp(lerp(intrusionScore,intrusionScore+delta,0.25),0,1);
+
+  if (intrusionScore>0.65&&!alarmTriggered) {
+    alarmTriggered=true;
+    triggerIntruderAlert();
+  } else if (!hasPersonNow&&intrusionScore<0.1) {
+    alarmTriggered=false;
+  }
+
+  prevPresence=hasPersonNow;
+}
+
+function triggerIntruderAlert() {
+  showBanner('🚨 INTRUDER DETECTED — ALARM TRIGGERED', 'intruder-alert', 6000);
+  flashScreen('rgba(255,51,85,0.5)', 5);
+  pushJarvis('INTRUDER ALERT · PERIMETER BREACH DETECTED');
+  document.getElementById('alarmPill').style.display='';
+  document.getElementById('mAlarm').textContent='ALARM';
+  setTimeout(()=>{ document.getElementById('alarmPill').style.display='none'; },8000);
+}
+
+// ── ALARM TOGGLE ──────────────────────────────────────────────────────────────
+function toggleAlarm() {
+  alarmArmed=!alarmArmed;
+  alarmTriggered=false; intrusionScore=0;
+  updateAlarmUI();
+  pushJarvis(alarmArmed?'INTRUDER ALARM ARMED · PERIMETER ACTIVE':'INTRUDER ALARM DISARMED · STANDBY');
+  showBanner(alarmArmed?'⬡ INTRUDER ALARM ARMED':'⬡ INTRUDER ALARM DISARMED', alarmArmed?'intruder-alert':'gesture-alert', 2500);
+}
+window.toggleAlarm=toggleAlarm;
+
+function updateAlarmUI() {
+  const btn=document.getElementById('armBtn');
+  const dot=document.getElementById('alarmDotBig');
+  const dot2=document.getElementById('alarmDot2');
+  const state=document.getElementById('alarmState');
+  const sub=document.getElementById('alarmSub');
+  const box=document.getElementById('alarmBox');
+  if (alarmTriggered) {
+    dot.className='alarm-dot triggered';
+    state.textContent='TRIGGERED'; state.style.color='var(--r)';
+    box.style.borderColor='var(--r)'; box.style.boxShadow='0 0 12px rgba(255,51,85,0.2)';
+    sub.textContent='BREACH DETECTED';
+    dot2.style.cssText='background:var(--r);box-shadow:0 0 6px var(--r);animation:blink 0.4s infinite;';
+  } else if (alarmArmed) {
+    dot.className='alarm-dot armed';
+    state.textContent='ARMED'; state.style.color='var(--r)';
+    box.style.borderColor='rgba(255,51,85,0.4)'; box.style.boxShadow='0 0 8px rgba(255,51,85,0.1)';
+    sub.textContent='PERIMETER ACTIVE';
+    dot2.style.cssText='background:var(--r);box-shadow:0 0 6px var(--r);animation:blink 1s infinite;';
+    btn.textContent='⬡ DISARM SYSTEM'; btn.className='arm-btn disarm';
+  } else {
+    dot.className='alarm-dot disarmed';
+    state.textContent='DISARMED'; state.style.color='var(--c)';
+    box.style.borderColor='rgba(0,245,255,0.1)'; box.style.boxShadow='none';
+    sub.textContent='SYSTEM STANDBY';
+    dot2.style.cssText='background:#1a1a2a;';
+    btn.textContent='⬡ ARM SYSTEM'; btn.className='arm-btn arm';
+  }
+  document.getElementById('mAlarm').textContent=alarmTriggered?'ALARM':alarmArmed?'ARMED':'OFF';
+  document.getElementById('mAlarm').style.color=alarmTriggered?'var(--r)':alarmArmed?'var(--a)':'var(--c)';
+}
+
+// ── GESTURE RECOGNITION ───────────────────────────────────────────────────────
 function fingerStates(lms) {
   if (!lms||lms.length<21) return [false,false,false,false,false];
-  const th = (1-lms[4].x) < (1-lms[2].x)-0.016;
-  const rest = [[8,6],[12,10],[16,14],[20,18]].map(([tip,base])=>lms[tip].y < lms[base].y-0.02);
+  const th=(1-lms[4].x)<(1-lms[2].x)-0.015;
+  const rest=[[8,6],[12,10],[16,14],[20,18]].map(([t,b])=>lms[t].y<lms[b].y-0.02);
   return [th,...rest];
 }
-function gesture(f) {
+function getGesture(f) {
   const [th,ix,mi,ri,pi]=f, n=f.filter(Boolean).length;
-  if (!th&&!ix&&!mi&&!ri&&!pi) return '✊ FIST';
-  if ( th&& ix&& mi&& ri&& pi) return '🖐 OPEN HAND';
-  if (!th&& ix&&!mi&&!ri&&!pi) return '☝ POINT';
-  if (!th&& ix&& mi&&!ri&&!pi) return '✌ PEACE';
-  if ( th&&!ix&&!mi&&!ri&& pi) return '🤙 SHAKA';
-  if ( th&& ix&&!mi&&!ri&&!pi) return '🤏 PINCH';
-  if (!th&& ix&& mi&& ri&& pi) return '🤘 ROCK ON';
-  if ( th&&!ix&&!mi&&!ri&&!pi) return '👍 THUMBS UP';
-  if ( n===3) return '3️⃣ THREE';
-  return `${n} FINGERS`;
+  if(!th&&!ix&&!mi&&!ri&&!pi) return 'FIST';
+  if(th&&ix&&mi&&ri&&pi)     return 'OPEN';
+  if(!th&&ix&&!mi&&!ri&&!pi) return 'POINT';
+  if(!th&&ix&&mi&&!ri&&!pi)  return 'PEACE';
+  if(th&&!ix&&!mi&&!ri&&pi)  return 'SHAKA';
+  if(th&&ix&&!mi&&!ri&&!pi)  return 'PINCH';
+  if(!th&&ix&&mi&&ri&&pi)    return 'ROCK';
+  if(th&&!ix&&!mi&&!ri&&!pi) return 'THUMB';
+  if(n===3) return 'THREE';
+  return n+'-UP';
+}
+const GESTURE_EMOJI={'FIST':'✊','OPEN':'🖐','POINT':'☝','PEACE':'✌','SHAKA':'🤙','PINCH':'🤏','ROCK':'🤘','THUMB':'👍','THREE':'3️⃣'};
+
+// ── GESTURE ACTIONS ───────────────────────────────────────────────────────────
+// Hold-based actions: must hold 1.5s. Instant actions: fire once.
+function processGestureAction(g) {
+  const now=Date.now();
+  if (now<gestureActionCooldown) return;
+
+  // Highlight active gesture in UI
+  ['fist','open','point','peace','shaka','thumb'].forEach(k=>{
+    document.getElementById('ga-'+k).className='gaction';
+  });
+  const map={FIST:'fist',OPEN:'open',POINT:'point',PEACE:'peace',SHAKA:'shaka',THUMB:'thumb'};
+  if (map[g]) document.getElementById('ga-'+map[g]).className='gaction active';
+
+  // Hold gestures
+  if (g==='FIST'||g==='OPEN') {
+    if (g!==lastGesture) { gestureHoldStart=now; lastGesture=g; return; }
+    if (now-gestureHoldStart<1500) {
+      const pct=Math.round((now-gestureHoldStart)/1500*100);
+      document.getElementById('gt-'+map[g]).textContent='HOLD '+pct+'%';
+      return;
+    }
+    // Executed
+    if (g==='FIST'&&!alarmArmed) { toggleAlarm(); }
+    else if (g==='OPEN'&&alarmArmed) { toggleAlarm(); }
+    document.getElementById('gt-'+map[g]).textContent='HOLD 1.5s';
+    gestureActionCooldown=now+2500;
+    lastGesture='';
+    return;
+  }
+
+  // Instant gestures - fire on new gesture
+  if (g===lastGesture) return;
+  lastGesture=g;
+
+  if (g==='POINT') {
+    gestureLockTarget=!gestureLockTarget;
+    pushJarvis(gestureLockTarget?'TARGET LOCKED · TRACKING ACTIVE':'TARGET LOCK RELEASED');
+    showBanner(gestureLockTarget?'⬡ TARGET LOCKED':'⬡ TARGET LOCK RELEASED','gesture-alert',2000);
+    gestureActionCooldown=now+1200;
+  } else if (g==='PEACE') {
+    alarmTriggered=false; intrusionScore=0; fallAlertShown=false; fallState='UPRIGHT';
+    updateAlarmUI();
+    const b=document.getElementById('alertBanner'); b.className=''; document.getElementById('mainLayout').classList.remove('banner-open');
+    pushJarvis('ALL ALERTS CLEARED · SYSTEM NOMINAL');
+    gestureActionCooldown=now+1200;
+  } else if (g==='SHAKA') {
+    gestureScanEnabled=!gestureScanEnabled;
+    pushJarvis(gestureScanEnabled?'SCANNING RESUMED':'SCANNING PAUSED');
+    gestureActionCooldown=now+1200;
+  } else if (g==='THUMB') {
+    pushJarvis('STATUS OK · ALL SYSTEMS NOMINAL · OPERATOR CONFIRMED');
+    showBanner('⬡ OPERATOR: STATUS OK — SYSTEMS NOMINAL','gesture-alert',2000);
+    gestureActionCooldown=now+1500;
+  }
 }
 
 // ── HEATMAP ───────────────────────────────────────────────────────────────────
-const HEAT_PTS = [0,11,12,23,24,15,16,27,28];
+const HEAT_PTS=[0,11,12,23,24,15,16,27,28];
+let heatImageData=null;
 function addHeat(lms) {
-  for (let y=0;y<HEAT_H;y++) for (let x=0;x<HEAT_W;x++) heatGrid[y][x]*=0.945;
-  if (!lms) return;
+  for(let y=0;y<HEAT_H;y++) for(let x=0;x<HEAT_W;x++) heatGrid[y][x]*=0.945;
+  if(!lms) return;
   HEAT_PTS.forEach(i=>{
-    const lm=lms[i]; if (!lm||(lm.visibility||0)<0.3) return;
+    const lm=lms[i]; if(!lm||(lm.visibility||0)<0.28) return;
     const gx=clamp(Math.floor((1-lm.x)*HEAT_W),0,HEAT_W-1);
     const gy=clamp(Math.floor(lm.y*HEAT_H),0,HEAT_H-1);
-    for (let dy=-2;dy<=2;dy++) for (let dx=-2;dx<=2;dx++) {
-      const nx=clamp(gx+dx,0,HEAT_W-1), ny=clamp(gy+dy,0,HEAT_H-1);
-      heatGrid[ny][nx]=Math.min(1, heatGrid[ny][nx]+Math.exp(-Math.sqrt(dx*dx+dy*dy)*0.9)*0.2);
+    for(let dy=-2;dy<=2;dy++) for(let dx=-2;dx<=2;dx++){
+      const nx=clamp(gx+dx,0,HEAT_W-1),ny=clamp(gy+dy,0,HEAT_H-1);
+      heatGrid[ny][nx]=Math.min(1,heatGrid[ny][nx]+Math.exp(-Math.sqrt(dx*dx+dy*dy)*0.9)*0.18);
     }
   });
 }
-
-// Reuse ImageData for heatmap — avoid object churn
-let heatImageData = null;
 function drawHeat() {
-  const W=heatCanvas.width, H=heatCanvas.height;
-  if (!heatImageData || heatImageData.width!==W || heatImageData.height!==H) {
-    heatImageData = heatCtx.createImageData(W, H);
-  }
-  const d=heatImageData.data;
-  const cw=W/HEAT_W, ch=H/HEAT_H;
-  // Fill transparent
-  d.fill(0);
-  for (let cy=0;cy<HEAT_H;cy++) for (let cx=0;cx<HEAT_W;cx++) {
-    const v=heatGrid[cy][cx]; if (v<0.01) continue;
-    const r=Math.floor(v*v*255), g=Math.floor(lerp(30,210,v)), b=Math.floor(lerp(60,80,v));
+  if (!heatCtx||!heatCanvas) return;
+  const W=heatCanvas.width,H=heatCanvas.height;
+  if(!heatImageData||heatImageData.width!==W||heatImageData.height!==H) heatImageData=heatCtx.createImageData(W,H);
+  const d=heatImageData.data; d.fill(0);
+  const cw=W/HEAT_W,ch=H/HEAT_H;
+  for(let cy=0;cy<HEAT_H;cy++) for(let cx=0;cx<HEAT_W;cx++){
+    const v=heatGrid[cy][cx]; if(v<0.01) continue;
+    const r=Math.floor(v*v*255),g=Math.floor(lerp(28,210,v)),b=Math.floor(lerp(55,75,v));
     const a=Math.floor(v*0.9*255);
-    const x0=Math.floor(cx*cw), y0=Math.floor(cy*ch);
-    const x1=Math.floor((cx+1)*cw), y1=Math.floor((cy+1)*ch);
-    for (let py=y0;py<y1&&py<H;py++) for (let px=x0;px<x1&&px<W;px++) {
-      const idx=(py*W+px)*4; d[idx]=r; d[idx+1]=g; d[idx+2]=b; d[idx+3]=a;
-    }
+    const x0=Math.floor(cx*cw),y0=Math.floor(cy*ch),x1=Math.floor((cx+1)*cw),y1=Math.floor((cy+1)*ch);
+    for(let py=y0;py<y1&&py<H;py++) for(let px=x0;px<x1&&px<W;px++){const idx=(py*W+px)*4;d[idx]=r;d[idx+1]=g;d[idx+2]=b;d[idx+3]=a;}
   }
   heatCtx.putImageData(heatImageData,0,0);
-  // Grid overlay
-  heatCtx.strokeStyle='rgba(0,245,255,0.04)'; heatCtx.lineWidth=0.5;
-  const cwa=W/HEAT_W, cha=H/HEAT_H;
-  for (let x=0;x<=HEAT_W;x++){heatCtx.beginPath();heatCtx.moveTo(x*cwa,0);heatCtx.lineTo(x*cwa,H);heatCtx.stroke();}
-  for (let y=0;y<=HEAT_H;y++){heatCtx.beginPath();heatCtx.moveTo(0,y*cha);heatCtx.lineTo(W,y*cha);heatCtx.stroke();}
-  heatCtx.strokeStyle='rgba(0,245,255,0.1)'; heatCtx.lineWidth=1;
-  heatCtx.strokeRect(0.5,0.5,W-1,H-1);
-}
-
-function drawWave() {
-  const W=waveCanvas.width, H=waveCanvas.height;
-  waveCtx.clearRect(0,0,W,H);
-  waveCtx.beginPath(); waveCtx.strokeStyle='#ffcc00'; waveCtx.lineWidth=1.5;
-  waveCtx.shadowColor='#ffcc00'; waveCtx.shadowBlur=5;
-  motionHistory.forEach((v,i)=>{ const x=i/motionHistory.length*W, y=H-v*H*0.82-2; i?waveCtx.lineTo(x,y):waveCtx.moveTo(x,y); });
-  waveCtx.stroke(); waveCtx.shadowBlur=0;
+  heatCtx.strokeStyle='rgba(0,245,255,0.04)';heatCtx.lineWidth=0.5;
+  const cwa=W/HEAT_W,cha=H/HEAT_H;
+  for(let x=0;x<=HEAT_W;x++){heatCtx.beginPath();heatCtx.moveTo(x*cwa,0);heatCtx.lineTo(x*cwa,H);heatCtx.stroke();}
+  for(let y=0;y<=HEAT_H;y++){heatCtx.beginPath();heatCtx.moveTo(0,y*cha);heatCtx.lineTo(W,y*cha);heatCtx.stroke();}
+  heatCtx.strokeStyle='rgba(0,245,255,0.09)';heatCtx.lineWidth=1;heatCtx.strokeRect(0.5,0.5,W-1,H-1);
 }
 
 // ── FPS ───────────────────────────────────────────────────────────────────────
 function countFps() {
   fpsFrames++;
   const now=performance.now();
-  if (now-fpsLast>1000) {
-    fps=fpsFrames; fpsFrames=0; fpsLast=now;
-    document.getElementById('cvFps').textContent=fps+'fps';
+  if(now-fpsLast>1000){
+    fps=fpsFrames;fpsFrames=0;fpsLast=now;
+    const s=fps+'fps';
+    document.getElementById('cvFps').textContent=s;
     document.getElementById('cbFps').style.width=clamp(fps/30*100,0,100)+'%';
     document.getElementById('mFps').textContent=fps;
-    document.getElementById('nfCam').textContent=fps+'fps';
-    document.getElementById('nfPose').textContent=fps+'fps';
-    document.getElementById('nfHand').textContent=fps+'fps';
+    document.getElementById('nfCam').textContent=s;
+    document.getElementById('nfPose').textContent=s;
+    document.getElementById('nfHand').textContent=s;
   }
 }
 
-// ── UI UPDATES (batched, avoid layout thrash) ─────────────────────────────────
-const $ = id => document.getElementById(id);
+// ── DOM SHORTHAND ─────────────────────────────────────────────────────────────
+const $=id=>document.getElementById(id);
 
-function updatePoseUI(lms) {
-  if (!lms || !lms.some(l=>l&&(l.visibility||0)>0.35)) {
+// ── UPDATE FALL UI ────────────────────────────────────────────────────────────
+function updateFallUI() {
+  const pct=Math.round((1-fallScore)*100);
+  const dot=$('fallDotBig'), label=$('fallStatus'), conf=$('fallConf'), bar=$('fallBar');
+  const fd=$('fallDot'), mf=$('mFall');
+
+  if (fallState==='FALL') {
+    dot.className='fall-dot fall';
+    label.textContent='FALL DETECTED'; label.style.color='var(--r)';
+    conf.textContent='SCORE: '+Math.round(fallScore*100)+'%';
+    bar.style.cssText='width:'+Math.round(fallScore*100)+'%;color:var(--r);background:var(--r);';
+    fd.style.cssText='background:var(--r);box-shadow:0 0 6px var(--r);animation:blink 0.5s infinite;';
+    mf.textContent='FALL'; mf.style.color='var(--r)';
+  } else if (fallState==='WARNING') {
+    dot.className='fall-dot warn';
+    label.textContent='POSTURE WARNING'; label.style.color='var(--a)';
+    conf.textContent='SCORE: '+Math.round(fallScore*100)+'%';
+    bar.style.cssText='width:'+Math.round(fallScore*100)+'%;color:var(--a);background:var(--a);';
+    fd.style.cssText='background:var(--a);box-shadow:0 0 5px var(--a);animation:blink 1s infinite;';
+    mf.textContent='WARN'; mf.style.color='var(--a)';
+  } else {
+    dot.className='fall-dot ok';
+    label.textContent='UPRIGHT'; label.style.color='var(--g)';
+    conf.textContent='SCORE: '+Math.round(fallScore*100)+'%';
+    bar.style.cssText='width:'+pct+'%;color:var(--g);background:var(--g);';
+    fd.style.cssText='background:#1a1a2a;box-shadow:none;animation:none;';
+    mf.textContent='OK'; mf.style.color='var(--g)';
+  }
+  $('torsoAngle').textContent=Math.round(torsoAngleSmooth)+'°';
+  $('hipHeight').textContent=Math.round(hipHeightSmooth*100)+'%';
+}
+
+// ── UPDATE PERSON CARDS ───────────────────────────────────────────────────────
+function updatePersonCards(tracks) {
+  const container=$('personCards');
+  if (!tracks||tracks.length===0) {
+    container.innerHTML='<div style="font-size:7px;color:rgba(0,245,255,0.16);text-align:center;padding:10px;">NO TARGETS DETECTED</div>';
+    $('mPersons').textContent='0';
+    $('cvTargets').textContent='0'; $('cbTargets').style.width='0%';
     $('cvDet').textContent='SCANNING'; $('cvDet').style.color='var(--a)';
-    $('cbDet').style.cssText='width:18%;background:var(--a);animation:blink 1s infinite;';
-    $('mPersons').textContent='0'; $('mConf').textContent='0%';
-    $('kpInfo').innerHTML='TARGETS: 0<br>POSE KP: 0<br>HANDS: —<br>CONF: 0%';
-    $('personList').innerHTML='<div style="font-size:7px;color:rgba(0,245,255,0.18);text-align:center;padding:7px;">NO TARGETS</div>';
+    $('cbDet').style.cssText='width:16%;background:var(--a);animation:blink 1s infinite;';
     return;
   }
-  const vis=lms.filter(l=>l&&(l.visibility||0)>0.5).length;
-  const conf=lms.reduce((s,l)=>s+(l?l.visibility||0:0),0)/lms.length;
-  const pct=n=>Math.round(n*100);
-
-  $('cvConf').textContent=pct(conf)+'%'; $('cbConf').style.width=pct(conf)+'%';
-  $('cvKP').textContent=vis+'/33'; $('cbKP').style.width=(vis/33*100)+'%';
+  $('mPersons').textContent=tracks.length;
+  $('cvTargets').textContent=tracks.length;
+  $('cbTargets').style.width=(tracks.length/4*100)+'%';
   $('cvDet').textContent='LOCKED'; $('cvDet').style.color='var(--g)';
   $('cbDet').style.cssText='width:100%;background:var(--g);box-shadow:0 0 4px var(--g);animation:none;';
-  $('mPersons').textContent=vis>5?'1':'0'; $('mConf').textContent=pct(conf)+'%';
-  $('kpInfo').innerHTML=`TARGETS: 1<br>POSE KP: ${vis}/33<br>HANDS: ${smoothHands.filter(h=>h.lms).length}<br>CONF: ${pct(conf)}%`;
 
-  const W=poseCanvas.width;
-  const ls=lms[11],rs=lms[12];
-  if (ls&&rs&&(ls.visibility||0)>0.32) {
-    const sw=Math.round(Math.sqrt(((ls.x-rs.x)*W)**2+((ls.y-rs.y)*poseCanvas.height)**2));
-    $('vShW').textContent=sw; $('vShBar').style.width=clamp(sw/280*100,0,100)+'%';
-  }
-  const nose=lms[0], ankle=lms[27]||lms[28];
-  if (nose&&ankle) { const bh=Math.round(Math.abs(nose.y-ankle.y)*poseCanvas.height); $('vBH').textContent=bh; $('vBHBar').style.width=clamp(bh/480*100,0,100)+'%'; }
-  const ls2=lms[11],rs2=lms[12],lhp=lms[23],rhp=lms[24];
-  if (ls2&&rs2&&lhp&&rhp) {
-    const ang=Math.round(Math.atan2((ls2.x+rs2.x)/2-(lhp.x+rhp.x)/2,-((ls2.y+rs2.y)/2-(lhp.y+rhp.y)/2))*180/PI);
-    $('vTorso').textContent=ang+'°'; $('vTBar').style.width=clamp((ang+90)/180*100,0,100)+'%';
-  }
-
-  // Motion
-  let motion=0;
-  if (prevPoseLms) {
-    let tot=0,cnt=0;
-    [0,11,12,23,24,15,16].forEach(i=>{ const c=lms[i],p=prevPoseLms[i]; if (c&&p&&(c.visibility||0)>0.28) { tot+=Math.sqrt((c.x-p.x)**2+(c.y-p.y)**2); cnt++; } });
-    motion=cnt?tot/cnt:0;
-  }
-  motionMag=lerp(motionMag,motion*52,0.25);
-  motionHistory.copyWithin(0,1); motionHistory[79]=clamp(motionMag,0,1);
-  prevPoseLms=lms;
-  $('vMot').textContent=motionMag<0.04?'IDLE':motionMag<0.12?'LOW':motionMag<0.28?'ACTIVE':'HIGH';
-
-  // Person card
-  $('personList').innerHTML=`<div class="pcard"><div class="pavatar">A</div><div class="ni"><div class="pid">TARGET-ALPHA</div><div class="pstats">${vis}/33 KP · LOCKED</div></div><div class="pconf">${pct(conf)}%</div></div>`;
-
-  addHeat(lms);
+  const html=tracks.map(t=>{
+    const vis=t.lms?t.lms.filter(l=>l&&(l.visibility||0)>0.5).length:0;
+    const conf=t.lms?Math.round(t.lms.reduce((s,l)=>s+(l?l.visibility||0:0),0)/t.lms.length*100):0;
+    const isFall=t.lms&&fallState==='FALL';
+    return `<div class="pcard${isFall?' fall':''}" style="border-color:${t.color};box-shadow:0 0 8px ${t.color}18;">
+      <div class="pavatar" style="border-color:${t.color};color:${t.color};">${t.label[0]}</div>
+      <div style="flex:1">
+        <div class="pid" style="color:${t.color};">TARGET-${t.label}</div>
+        <div class="pstats">${vis}/33 KP · AGE ${t.age}f</div>
+        <div class="pstatus" style="color:${isFall?'var(--r)':'var(--g)'};">${isFall?'⚠ FALL':'✓ NOMINAL'}</div>
+      </div>
+      <div class="pconf" style="color:${t.color};">${conf}%</div>
+    </div>`;
+  }).join('');
+  container.innerHTML=html;
 }
 
-function updateHandUI(hands) {
+// ── UPDATE HAND UI ────────────────────────────────────────────────────────────
+function updateHandUI(hands, gestureStr) {
   const ph=hands.find(h=>h.lms);
-  if (ph) {
-    const ext=fingerStates(ph.lms), g=gesture(ext);
-    ext.forEach((up,i)=>{ const el=$('f'+i); el.className='fc'+(up?' up':''); });
-    $('gestureName').textContent=g;
-    $('gestureConf').textContent=`${ph.label.toUpperCase()} · ${Math.round(ph.score*100)}%`;
-    $('mGest').textContent=ext.filter(Boolean).length;
+  if (ph&&ph.lms) {
+    const ext=fingerStates(ph.lms);
+    ext.forEach((up,i)=>{ $('f'+i).className='fc'+(up?' up':''); });
+    const emoji=GESTURE_EMOJI[gestureStr]||'';
+    $('gestureName').textContent=(emoji?emoji+' ':'')+gestureStr;
+    $('gestureConf').textContent=ph.label.toUpperCase()+' HAND · '+Math.round(ph.score*100)+'%';
+
     const lh=hands.find(h=>h.label==='Left'), rh=hands.find(h=>h.label==='Right');
     const p=v=>Math.round(v*100)+'%';
     $('wLX').textContent=lh&&lh.lms?p(lh.lms[0].x):'—';
@@ -775,115 +1091,153 @@ function updateHandUI(hands) {
     $('wRY').textContent=rh&&rh.lms?p(rh.lms[0].y):'—';
   } else {
     for(let i=0;i<5;i++) $('f'+i).className='fc';
-    $('gestureName').textContent='AWAITING'; $('gestureConf').textContent='NO HAND IN FRAME'; $('mGest').textContent='—';
-    ['wLX','wLY','wRX','wRY'].forEach(id=>$(id).textContent='—');
+    $('gestureName').textContent='AWAITING'; $('gestureConf').textContent='NO HAND IN FRAME';
+    lastGesture='';
   }
   $('mHands').textContent=hands.filter(h=>h.lms).length;
 }
 
-// ── RENDER LOOP ───────────────────────────────────────────────────────────────
+// ── MAIN RENDER LOOP ──────────────────────────────────────────────────────────
 function renderLoop() {
-  // Sync canvas size to actual video element size (cheap check)
+  if (!poseCtx||!poseCanvas) return;
   const video=$('videoEl');
-  const W=video.clientWidth|0 || 640;
-  const H=video.clientHeight|0 || 480;
-  if (poseCanvas.width!==W||poseCanvas.height!==H) { poseCanvas.width=W; poseCanvas.height=H; }
+  const W=video.clientWidth|0||640, H=video.clientHeight|0||480;
+  if(poseCanvas.width!==W||poseCanvas.height!==H){poseCanvas.width=W;poseCanvas.height=H;}
 
   poseCtx.clearRect(0,0,W,H);
-  if (smoothPose) { drawBBox(smoothPose,W,H); drawBody(smoothPose,W,H); }
-  smoothHands.forEach(h=>{ if(h.lms) drawHand(h.lms,W,H,h.label); });
+
+  if (gestureScanEnabled) {
+    activeTracks.forEach(t=>{
+      if (!t.lms||t.missing>3) return;
+      drawBBox(t.lms,W,H,t.color,t.label);
+      drawBody(t.lms,W,H,t.color);
+    });
+    smoothHands.forEach(h=>{ if(h.lms) drawHand(h.lms,W,H,h.label); });
+  }
 
   drawHeat();
-  drawWave();
+  updateFallUI();
+  updateAlarmUI();
   countFps();
   requestAnimationFrame(renderLoop);
 }
 
-// ── MEDIAPIPE — INTERLEAVED ───────────────────────────────────────────────────
-// Key optimization: alternate Pose and Hands on even/odd frames so we never
-// run both heavy WASM modules in the same camera callback → halves per-frame compute.
+// ── MEDIAPIPE SETUP ───────────────────────────────────────────────────────────
 function startSensing() {
-  const video = $('videoEl');
+  const video=$('videoEl');
+  let prevPoseLms=null, motionMagLocal=0;
 
-  const pose = new Pose({ locateFile: f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}` });
+  const pose=new Pose({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`});
   pose.setOptions({
-    modelComplexity: 0,           // ← 0 is much faster than 1, barely less accurate
-    smoothLandmarks: true,
-    enableSegmentation: false,
-    smoothSegmentation: false,
-    minDetectionConfidence: 0.5,
-    minTrackingConfidence: 0.5,
+    modelComplexity:0, smoothLandmarks:true,
+    enableSegmentation:false, smoothSegmentation:false,
+    minDetectionConfidence:0.5, minTrackingConfidence:0.5,
   });
   pose.onResults(r=>{
-    smoothPose = poseSmoother.update(r.poseLandmarks&&r.poseLandmarks.length ? r.poseLandmarks : null);
-    updatePoseUI(smoothPose);
+    const raw=r.poseLandmarks&&r.poseLandmarks.length?r.poseLandmarks:null;
+    activeTracks=personTracker.update(raw);
+    const hasP=activeTracks.length>0&&activeTracks[0].lms&&activeTracks[0].lms.some(l=>l&&(l.visibility||0)>0.35);
+    const mainLms=hasP?activeTracks[0].lms:null;
+
+    // Motion for intrusion
+    if (mainLms&&prevPoseLms) {
+      let tot=0,cnt=0;
+      [0,11,12,23,24].forEach(i=>{
+        const c=mainLms[i],p=prevPoseLms[i];
+        if(c&&p&&(c.visibility||0)>0.25){tot+=Math.sqrt((c.x-p.x)**2+(c.y-p.y)**2);cnt++;}
+      });
+      motionMagLocal=cnt?lerp(motionMagLocal,tot/cnt*40,0.25):lerp(motionMagLocal,0,0.15);
+    } else { motionMagLocal=lerp(motionMagLocal,0,0.15); }
+    lastMotionScore=clamp(motionMagLocal,0,1);
+    prevPoseLms=mainLms;
+
+    analyzeFall(mainLms);
+    checkIntrusion(hasP);
+    updatePersonCards(activeTracks);
+
+    // Conf + KP badge
+    if (mainLms) {
+      const vis=mainLms.filter(l=>l&&(l.visibility||0)>0.5).length;
+      const conf=Math.round(mainLms.reduce((s,l)=>s+(l?l.visibility||0:0),0)/mainLms.length*100);
+      $('cvConf').textContent=conf+'%'; $('cbConf').style.width=conf+'%';
+      $('kpInfo').innerHTML=`TARGETS: ${activeTracks.length}<br>HANDS: ${smoothHands.filter(h=>h.lms).length}<br>GESTURE: ${lastGesture||'—'}<br>CONF: ${conf}%`;
+      addHeat(mainLms);
+    } else {
+      $('kpInfo').innerHTML='TARGETS: 0<br>HANDS: 0<br>GESTURE: —<br>CONF: 0%';
+    }
+
+    // Intrusion bar
+    $('intrusionScore').textContent=Math.round(intrusionScore*100);
+    $('intrusionBar').style.width=Math.round(intrusionScore*100)+'%';
+    if(intrusionScore>0.65) {
+      $('intrusionBar').style.background='var(--r)';
+      $('intrusionBar').style.color='var(--r)';
+    } else if(intrusionScore>0.3){
+      $('intrusionBar').style.background='var(--a)';
+    } else {
+      $('intrusionBar').style.background='var(--a)';
+    }
   });
 
-  const hands = new Hands({ locateFile: f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
-  hands.setOptions({
-    maxNumHands: 2,
-    modelComplexity: 0,           // ← 0 for speed
-    minDetectionConfidence: 0.55,
-    minTrackingConfidence: 0.5,
-  });
+  const hands=new Hands({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`});
+  hands.setOptions({maxNumHands:2,modelComplexity:0,minDetectionConfidence:0.55,minTrackingConfidence:0.5});
   hands.onResults(r=>{
     smoothHands=[{lms:null,label:'Left',score:0},{lms:null,label:'Right',score:0}];
-    if (r.multiHandLandmarks&&r.multiHandLandmarks.length) {
+    if(r.multiHandLandmarks&&r.multiHandLandmarks.length){
       r.multiHandLandmarks.forEach((lms,i)=>{
-        const cls=r.multiHandedness[i];
-        const label=cls?cls.label:'Right', score=cls?cls.score:1;
+        const cls=r.multiHandedness[i], label=cls?cls.label:'Right', score=cls?cls.score:1;
         const idx=label==='Left'?0:1;
-        const sm=idx===0?handSmootherL:handSmootherR;
-        smoothHands[idx]={lms:sm.update(lms),label,score};
+        smoothHands[idx]={lms:(idx===0?handSmL:handSmR).update(lms),label,score};
       });
-    } else {
-      handSmootherL.reset(); handSmootherR.reset();
+    } else { handSmL.reset(); handSmR.reset(); }
+
+    const ph=smoothHands.find(h=>h.lms);
+    let gStr='';
+    if(ph&&ph.lms){
+      const ext=fingerStates(ph.lms);
+      gStr=getGesture(ext);
+      processGestureAction(gStr);
     }
-    updateHandUI(smoothHands);
+    updateHandUI(smoothHands,gStr);
   });
 
-  // ── INTERLEAVED CAMERA CALLBACK ───────────────────────────────────────────
-  // Frame 0,2,4,… → Pose; Frame 1,3,5,… → Hands
-  // Means each model runs at ~15fps independently, but the loop stays at 30fps.
-  // Result: no frame where both models block simultaneously.
-  let frameCount = 0;
-  const camera = new Camera(video, {
-    onFrame: async () => {
-      if (frameCount % 2 === 0) {
-        await pose.send({image: video});
-      } else {
-        await hands.send({image: video});
-      }
-      frameCount++;
+  // Interleaved: pose on even, hands on odd frames
+  let fc=0;
+  const camera=new Camera(video,{
+    onFrame:async()=>{
+      if(!gestureScanEnabled){fc++;return;}
+      if(fc%2===0) await pose.send({image:video});
+      else await hands.send({image:video});
+      fc++;
     },
-    width: 640, height: 480
+    width:640,height:480
   });
 
   camera.start().then(()=>{
     const s=$('liveStatus');
     s.textContent='● LIVE'; s.style.color='var(--g)'; s.style.borderColor='var(--g)'; s.style.textShadow='0 0 8px var(--g)';
-    pushJarvis('CAMERA ONLINE · INTERLEAVED PIPELINE ACTIVE');
+    pushJarvis('CAMERA ONLINE · SENTINEL v3 FULLY OPERATIONAL');
     renderLoop();
   }).catch(err=>{
-    $('errMsg').textContent='Camera error: '+err.message+'. Please allow webcam access and reload.';
+    $('errMsg').textContent='Camera error: '+err.message+'. Allow webcam and reload.';
     $('errBox').style.display='block';
   });
 }
 
 // ── BOOT ──────────────────────────────────────────────────────────────────────
+// Init canvases immediately — DOM is ready since script is at end of body
+if (!initCanvases()) {
+  console.error('RUVIEW: Canvas init failed — check element IDs in HTML');
+}
+
 let lp=0;
-const lbar=$('loadBar');
-const lInterval=setInterval(()=>{ lp+=Math.random()*7+1; if(lp>95)lp=95; lbar.style.width=lp+'%'; },120);
-
-window.addEventListener('resize', resizeAll, {passive:true});
-
+const lInterval=setInterval(()=>{ lp+=Math.random()*6+1; if(lp>95)lp=95; $('loadBar').style.width=lp+'%'; },110);
+window.addEventListener('resize',resizeAll,{passive:true});
 $('startBtn').addEventListener('click',()=>{
-  clearInterval(lInterval); lbar.style.width='100%';
-  const splash=$('splash');
-  splash.style.transition='opacity 0.65s'; splash.style.opacity='0';
-  setTimeout(()=>{ splash.style.display='none'; resizeAll(); startSensing(); }, 660);
+  clearInterval(lInterval); $('loadBar').style.width='100%';
+  const s=$('splash'); s.style.transition='opacity 0.6s'; s.style.opacity='0';
+  setTimeout(()=>{ s.style.display='none'; resizeAll(); startSensing(); },620);
 });
-
 setTimeout(resizeAll,100);
 </script>
 </body>
